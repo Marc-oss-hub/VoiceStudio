@@ -25,6 +25,8 @@ const OUT_ROW =
   'flex min-w-0 flex-wrap items-center gap-x-[var(--space-3)] gap-y-[6px] text-[length:var(--text-xs)] text-[var(--chrome-fg-muted)] font-[family-name:var(--font-sans)]';
 const OUT_LABEL =
   'inline-flex h-[24px] items-center gap-[5px] rounded-[var(--chrome-radius-pill)] px-[5px] cursor-pointer transition-colors hover:bg-[var(--chrome-hover-bg)] hover:text-[var(--chrome-fg)]';
+const OUT_TITLE =
+  'font-[family-name:var(--chrome-font-mono)] text-[length:var(--chrome-label-size)] font-semibold uppercase tracking-[var(--chrome-label-track)] text-[var(--chrome-fg-muted)]';
 const CHK = 'accent-[var(--color-brand)]';
 const BULK_SELECT = 'input-base !text-[0.62rem] !px-[4px] !py-[2px]';
 const SETTINGS_HEADING =
