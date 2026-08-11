@@ -1,5 +1,5 @@
-import { FileText, Save, RotateCcw } from 'lucide-react';
-import { Button } from '../../ui';
+import { FileText, Save, X, ChevronDown } from 'lucide-react';
+import { Button, Menu } from '../../ui';
 import DubPipelineStepper from './DubPipelineStepper';
 import { formatTime } from '../../utils/format';
 
@@ -9,8 +9,8 @@ export default function DubHeader({
   dubDuration,
   dubSegments,
   activeProjectName,
-  saveProject,
   resetDub,
+  closeDubAndSave,
   dubStep,
   pipelineSteps,
   onPipelineStep,
@@ -58,12 +58,46 @@ export default function DubHeader({
 
       <div className="dub-command-bar__actions">
         <div className="dub-command-bar__utilities">
-          <Button variant="subtle" size="sm" onClick={saveProject} leading={<Save size={12} />}>
-            {t('dub.save')}
-          </Button>
-          <Button variant="danger" size="sm" onClick={resetDub} leading={<RotateCcw size={12} />}>
-            {t('dub.reset')}
-          </Button>
+          <div className="inline-flex overflow-hidden rounded-[var(--chrome-radius-pill)] border border-[var(--chrome-border)]">
+            <Button
+              variant="subtle"
+              size="sm"
+              className="!rounded-none !border-0"
+              onClick={closeDubAndSave}
+              leading={<Save size={12} />}
+            >
+              {t('dub.close_and_save')}
+            </Button>
+            <Menu
+              placement="bottom-end"
+              width={196}
+              items={[
+                {
+                  id: 'close-saved',
+                  label: t('dub.close_and_save'),
+                  icon: Save,
+                  onSelect: closeDubAndSave,
+                },
+                {
+                  id: 'close-unsaved',
+                  label: t('dub.close_without_saving'),
+                  icon: X,
+                  destructive: true,
+                  onSelect: resetDub,
+                },
+              ]}
+            >
+              <Button
+                variant="subtle"
+                size="sm"
+                className="!rounded-none !border-0 border-l border-l-[var(--chrome-border)] !px-[6px]"
+                aria-label={t('dub.close_and_save')}
+                title={t('dub.close_and_save')}
+              >
+                <ChevronDown size={12} />
+              </Button>
+            </Menu>
+          </div>
         </div>
       </div>
     </div>

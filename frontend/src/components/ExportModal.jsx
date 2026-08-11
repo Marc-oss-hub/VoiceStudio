@@ -16,6 +16,7 @@ import {
   Building2,
 } from 'lucide-react';
 import { Button, Segmented, Badge } from '../ui';
+import PreviewTrackPicker from './dub/PreviewTrackPicker';
 
 // ── Tailwind class fragments for the stateful chrome that used to live in
 // ExportModal.css (track chips, tab strip, toggles). Kept as module constants
@@ -421,22 +422,16 @@ export default function ExportModal({
                   label={t('exportModal.default_audio_track')}
                   hint={t('exportModal.default_audio_hint')}
                 >
-                  <select
-                    className="input-base input-base--xs"
+                  <PreviewTrackPicker
                     value={defaultTrack}
-                    onChange={(e) => setDefaultTrack(e.target.value)}
-                  >
-                    {exportTracks['original'] !== false && (
-                      <option value="original">{t('exportModal.original')}</option>
-                    )}
-                    {(dubTracks || [])
-                      .filter((code) => exportTracks[code] !== false)
-                      .map((code) => (
-                        <option key={code} value={code}>
-                          {code.toUpperCase()} {t('exportModal.dub_suffix')}
-                        </option>
-                      ))}
-                  </select>
+                    tracks={(dubTracks || []).filter((code) => exportTracks[code] !== false)}
+                    onChange={setDefaultTrack}
+                    label={t('exportModal.default_audio_track')}
+                    originalLabel={t('exportModal.original')}
+                    searchLabel={t('common.search')}
+                    getTooltip={(code) => `${code.toUpperCase()} ${t('exportModal.dub_suffix')}`}
+                    includeOriginal={exportTracks.original !== false}
+                  />
                 </Field>
                 <Field label={t('exportModal.bg_audio')}>
                   <label className={TOGGLE_CLS}>
@@ -515,17 +510,15 @@ export default function ExportModal({
                     ]}
                   />
                   {audioBatch === 'primary' && (
-                    <select
-                      className="input-base input-base--xs mt-[6px]"
+                    <PreviewTrackPicker
                       value={audioPrimaryLang}
-                      onChange={(e) => setAudioPrimaryLang(e.target.value)}
-                    >
-                      {(dubTracks || []).map((code) => (
-                        <option key={code} value={code}>
-                          {code.toUpperCase()}
-                        </option>
-                      ))}
-                    </select>
+                      tracks={dubTracks || []}
+                      onChange={setAudioPrimaryLang}
+                      label={t('exportModal.export_single_lang')}
+                      originalLabel={t('exportModal.original')}
+                      searchLabel={t('common.search')}
+                      includeOriginal={false}
+                    />
                   )}
                 </Field>
                 <Field label={t('exportModal.bg_audio')}>

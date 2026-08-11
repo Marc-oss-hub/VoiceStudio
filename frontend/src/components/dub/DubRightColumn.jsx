@@ -1,10 +1,19 @@
 import { Suspense, lazy, useState } from 'react';
-import { ChevronUp, ChevronDown, FileText, ClipboardPaste } from 'lucide-react';
+import {
+  ChevronUp,
+  ChevronDown,
+  Clock3,
+  FileText,
+  ClipboardPaste,
+  Mic2,
+  SlidersHorizontal,
+} from 'lucide-react';
 import { Button, Segmented } from '../../ui';
 import GlossaryPanel from '../GlossaryPanel';
 import CheckpointBanner from '../CheckpointBanner';
 import { LANG_CODES } from '../../utils/languages';
 import { autoProfileId } from '../../utils/segments';
+import PreviewTrackPicker from './PreviewTrackPicker';
 
 const DubSegmentTable = lazy(() => import('../DubSegmentTable'));
 const DubPasteTranslationDialog = lazy(() => import('./DubPasteTranslationDialog'));
@@ -13,13 +22,13 @@ const LazyFallback = () => <div className="p-[12px] text-[#6b6657] text-[0.7rem]
 
 // ── Output-options + bulk-select utility clusters ────────────────────────
 const OUT_ROW =
-  'flex items-center gap-[var(--space-3)] mb-[2px] px-[var(--space-2)] text-[length:var(--text-xs)] text-[var(--chrome-fg-muted)] font-[family-name:var(--font-sans)] flex-wrap';
+  'flex min-w-0 flex-wrap items-center gap-x-[var(--space-3)] gap-y-[6px] text-[length:var(--text-xs)] text-[var(--chrome-fg-muted)] font-[family-name:var(--font-sans)]';
 const OUT_LABEL =
-  'flex items-center gap-[var(--space-2)] cursor-pointer hover:text-[var(--chrome-fg)]';
-const OUT_TITLE =
-  'font-[family-name:var(--chrome-font-mono)] text-[length:var(--chrome-label-size)] tracking-[var(--chrome-label-track)] uppercase text-[var(--chrome-fg-muted)] font-semibold';
+  'inline-flex h-[24px] items-center gap-[5px] rounded-[var(--chrome-radius-pill)] px-[5px] cursor-pointer transition-colors hover:bg-[var(--chrome-hover-bg)] hover:text-[var(--chrome-fg)]';
 const CHK = 'accent-[var(--color-brand)]';
 const BULK_SELECT = 'input-base !text-[0.62rem] !px-[4px] !py-[2px]';
+const SETTINGS_HEADING =
+  'inline-flex shrink-0 items-center gap-[5px] [font-family:var(--chrome-font-mono)] text-[length:var(--chrome-label-size)] font-semibold uppercase tracking-[var(--chrome-label-track)] text-[var(--chrome-fg-muted)]';
 
 export default function DubRightColumn({
   t,
@@ -83,151 +92,160 @@ export default function DubRightColumn({
   const [pasteOpen, setPasteOpen] = useState(false);
   return (
     <div className="studio-panel dub-panel-col">
-      {/* Output options + timing — moved to the top of the right section. */}
-      <div>
-        <div className={OUT_ROW}>
-          <span className={OUT_TITLE}>{t('dub.output_options')}</span>
-          <label className={OUT_LABEL}>
-            <input
-              type="checkbox"
-              className={CHK}
-              checked={preserveBg}
-              onChange={(e) => setPreserveBg(e.target.checked)}
-            />{' '}
-            {t('dub.mix_bg_audio')}
-          </label>
-          <label className={OUT_LABEL} title={t('dub.dual_subs_title')}>
-            <input
-              type="checkbox"
-              className={CHK}
-              checked={!!dualSubs}
-              onChange={(e) => setDualSubs(e.target.checked)}
-            />{' '}
-            {t('dub.dual_subs')}
-          </label>
-          <label className={OUT_LABEL} title={t('dub.burn_subs_title')}>
-            <input
-              type="checkbox"
-              className={CHK}
-              checked={!!burnSubs}
-              onChange={(e) => setBurnSubs(e.target.checked)}
-            />{' '}
-            {t('dub.burn_subs')}
-          </label>
-          <label className={OUT_LABEL}>
-            {t('dub.default_track')}
-            <select
-              className="input-base !text-[0.6rem] !px-[4px] !py-[2px] !w-[120px]"
-              value={defaultTrack}
-              onChange={(e) => setDefaultTrack(e.target.value)}
-            >
-              <option value="original">{t('dub.original_track')}</option>
-              {dubLangCode && (
-                <option value={dubLangCode}>{t('dub.selected_dub', { code: dubLangCode })}</option>
-              )}
-              {dubTracks
-                .filter((tr) => tr !== dubLangCode)
-                .map((tr) => (
-                  <option key={tr} value={tr}>
-                    {t('dub.dub_track', { code: tr })}
-                  </option>
-                ))}
-            </select>
-          </label>
-        </div>
-        <div
-          className={OUT_ROW}
-          title="Timing strategy — how the dub reconciles natural-rate TTS with the original timeline."
-        >
-          <span className={OUT_TITLE}>Timing:</span>
-          <Segmented
-            value={timingStrategy}
-            onChange={setTimingStrategy}
-            items={[
-              {
-                value: 'concise',
-                label: 'Concise',
-                title:
-                  'Translator trims text to fit at natural rate. Overflows surface in the row badge so you can shorten the segment.',
-              },
-              {
-                value: 'smart_fit',
-                label: t('dub.timing_smart_fit'),
-                title: t('dub.timing_smart_fit_title'),
-              },
-              {
-                value: 'stretch_video',
-                label: 'Stretch Video',
-                title:
-                  'Audio plays at natural rate; each segment of the video is stretched (per-segment ffmpeg setpts) to fit. Total video duration grows. Requires a re-encode pass.',
-              },
-              {
-                value: 'strict_slot',
-                label: 'Strict slot',
-                title:
-                  'Legacy: compress audio to fit the original timing. Can sound rushed/chipmunky on high-density target languages.',
-              },
-            ]}
-          />
-        </div>
-        {/* Voice match — whether each line clones from its own source clip
-            (best prosody, identity may drift) or every line of a speaker
-            shares ONE reference (steady identity). */}
-        <div className={OUT_ROW} title={t('dub.voice_match_title')}>
-          <span className={OUT_TITLE}>{t('dub.voice_match')}</span>
-          <Segmented
-            value={voiceMatch}
-            onChange={setVoiceMatch}
-            items={[
-              {
-                value: 'per_line',
-                label: t('dub.voice_match_per_line'),
-                title: t('dub.voice_match_per_line_title'),
-              },
-              {
-                value: 'consistent',
-                label: t('dub.voice_match_consistent'),
-                title: t('dub.voice_match_consistent_title'),
-              },
-            ]}
-          />
-        </div>
-      </div>
-
-      {dubTranscript && (
-        <div className="mb-[4px]">
-          <div
-            className="override-toggle dub-transcript-toggle__inner"
-            onClick={() => setShowTranscript(!showTranscript)}
-          >
-            <span>
-              <FileText size={10} className="align-middle mr-[3px]" /> {t('dub.transcript')}
-            </span>
-            {showTranscript ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+      <section className="mb-[6px] overflow-hidden rounded-[6px] border border-[var(--chrome-border)] bg-[var(--chrome-panel-bg)]">
+        <div className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[5px] px-[8px] py-[6px]">
+          <span className={SETTINGS_HEADING}>
+            <SlidersHorizontal size={10} /> {t('dub.output_options')}
+          </span>
+          <div className={OUT_ROW}>
+            <label className={OUT_LABEL}>
+              <input
+                type="checkbox"
+                className={CHK}
+                checked={preserveBg}
+                onChange={(e) => setPreserveBg(e.target.checked)}
+              />{' '}
+              {t('dub.mix_bg_audio')}
+            </label>
+            <label className={OUT_LABEL} title={t('dub.dual_subs_title')}>
+              <input
+                type="checkbox"
+                className={CHK}
+                checked={!!dualSubs}
+                onChange={(e) => setDualSubs(e.target.checked)}
+              />{' '}
+              {t('dub.dual_subs')}
+            </label>
+            <label className={OUT_LABEL} title={t('dub.burn_subs_title')}>
+              <input
+                type="checkbox"
+                className={CHK}
+                checked={!!burnSubs}
+                onChange={(e) => setBurnSubs(e.target.checked)}
+              />{' '}
+              {t('dub.burn_subs')}
+            </label>
           </div>
-          {showTranscript && (
-            <div className="bg-[var(--chrome-bg)] border border-transparent border-t-0 rounded-b-[var(--chrome-radius-pill)] p-[var(--space-3)] text-[length:var(--text-xs)] text-[var(--chrome-fg-muted)] leading-[1.5] max-h-[80px] overflow-y-auto">
-              {dubTranscript}
-            </div>
-          )}
         </div>
-      )}
+        <div className="border-t border-[var(--chrome-border)] px-[8px] py-[6px]">
+          <PreviewTrackPicker
+            value={defaultTrack}
+            tracks={dubTracks}
+            onChange={setDefaultTrack}
+            label={t('dub.default_track')}
+            originalLabel={t('dub.original_track')}
+            searchLabel={t('common.search')}
+            getTooltip={(code) => t('dub.dub_track', { code })}
+          />
+        </div>
+        <div className="grid gap-[6px] border-t border-[var(--chrome-border)] px-[8px] py-[6px] min-[760px]:grid-cols-2">
+          <div
+            className={OUT_ROW}
+            title="Timing strategy — how the dub reconciles natural-rate TTS with the original timeline."
+          >
+            <span className={SETTINGS_HEADING}>
+              <Clock3 size={10} /> {t('dub.timing')}
+            </span>
+            <Segmented
+              value={timingStrategy}
+              onChange={setTimingStrategy}
+              items={[
+                {
+                  value: 'concise',
+                  label: t('dub.timing_concise'),
+                  title:
+                    'Translator trims text to fit at natural rate. Overflows surface in the row badge so you can shorten the segment.',
+                },
+                {
+                  value: 'smart_fit',
+                  label: t('dub.timing_smart_fit'),
+                  title: t('dub.timing_smart_fit_title'),
+                },
+                {
+                  value: 'stretch_video',
+                  label: t('dub.timing_stretch_video'),
+                  title:
+                    'Audio plays at natural rate; each segment of the video is stretched (per-segment ffmpeg setpts) to fit. Total video duration grows. Requires a re-encode pass.',
+                },
+                {
+                  value: 'strict_slot',
+                  label: t('dub.timing_strict_slot'),
+                  title:
+                    'Legacy: compress audio to fit the original timing. Can sound rushed/chipmunky on high-density target languages.',
+                },
+              ]}
+            />
+          </div>
+          <div className={OUT_ROW} title={t('dub.voice_match_title')}>
+            <span className={SETTINGS_HEADING}>
+              <Mic2 size={10} /> {t('dub.voice_match')}
+            </span>
+            <Segmented
+              value={voiceMatch}
+              onChange={setVoiceMatch}
+              items={[
+                {
+                  value: 'per_line',
+                  label: t('dub.voice_match_per_line'),
+                  title: t('dub.voice_match_per_line_title'),
+                },
+                {
+                  value: 'consistent',
+                  label: t('dub.voice_match_consistent'),
+                  title: t('dub.voice_match_consistent_title'),
+                },
+              ]}
+            />
+          </div>
+        </div>
+      </section>
 
-      {/* Phase 1.3 — Project glossary. Hidden behind a chip until
-                  the user wants it (or terms already exist). */}
-      {dubJobId && !glossaryVisible && (
-        <button
-          type="button"
-          className="inline-flex items-center px-[var(--space-3)] py-[3px] mb-[4px] font-[family-name:var(--chrome-font-mono)] text-[length:var(--chrome-label-size)] tracking-[var(--chrome-label-track)] uppercase text-[var(--chrome-fg-muted)] bg-transparent border border-transparent rounded-[var(--chrome-radius-pill)] cursor-pointer transition-colors hover:bg-[var(--chrome-hover-bg)] hover:border-transparent hover:text-[var(--chrome-fg)]"
-          onClick={() => {
-            setGlossaryOpen(true);
-            setGlossaryHidden(false);
-          }}
-          title={t('dub.glossary_title')}
-        >
-          {t('dub.glossary_btn', { count: glossaryTermCount })}
-        </button>
-      )}
+      <div className="mb-[4px] flex min-h-[28px] flex-wrap items-center gap-[4px] border-y border-[var(--chrome-border)] px-[4px] py-[3px]">
+        {dubTranscript ? (
+          <button
+            type="button"
+            className="inline-flex items-center gap-[4px] rounded-[var(--chrome-radius-pill)] border border-transparent bg-transparent px-[6px] py-[3px] [font-family:var(--chrome-font-mono)] text-[length:var(--chrome-label-size)] font-semibold uppercase tracking-[var(--chrome-label-track)] text-[var(--chrome-fg-muted)] transition-colors hover:bg-[var(--chrome-hover-bg)] hover:text-[var(--chrome-fg)]"
+            onClick={() => setShowTranscript(!showTranscript)}
+            aria-expanded={showTranscript}
+          >
+            <FileText size={10} /> {t('dub.transcript')}
+            {showTranscript ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+          </button>
+        ) : null}
+        {dubJobId && !glossaryVisible ? (
+          <button
+            type="button"
+            className="inline-flex items-center rounded-[var(--chrome-radius-pill)] border border-transparent bg-transparent px-[6px] py-[3px] [font-family:var(--chrome-font-mono)] text-[length:var(--chrome-label-size)] font-semibold uppercase tracking-[var(--chrome-label-track)] text-[var(--chrome-fg-muted)] transition-colors hover:bg-[var(--chrome-hover-bg)] hover:text-[var(--chrome-fg)]"
+            onClick={() => {
+              setGlossaryOpen(true);
+              setGlossaryHidden(false);
+            }}
+            title={t('dub.glossary_title')}
+          >
+            {t('dub.glossary_btn', { count: glossaryTermCount })}
+          </button>
+        ) : null}
+        {pasteTranslations ? (
+          <Button
+            variant="subtle"
+            size="sm"
+            className="ml-auto"
+            onClick={() => setPasteOpen(true)}
+            disabled={!dubSegments.length}
+            title={t('dub.paste_translation_title')}
+            leading={<ClipboardPaste size={10} />}
+          >
+            {t('dub.paste_translation_btn')}
+          </Button>
+        ) : null}
+      </div>
+      {showTranscript && dubTranscript ? (
+        <div className="mb-[4px] max-h-[80px] overflow-y-auto rounded-b-[var(--chrome-radius-pill)] border border-t-0 border-[var(--chrome-border)] bg-[var(--chrome-bg)] p-[var(--space-3)] text-[length:var(--text-xs)] leading-[1.5] text-[var(--chrome-fg-muted)]">
+          {dubTranscript}
+        </div>
+      ) : null}
+
+      {/* Phase 1.3 — Project glossary. Expanded only on request. */}
       {dubJobId && glossaryVisible && (
         <div className="mb-[4px]">
           <GlossaryPanel
@@ -360,23 +378,6 @@ export default function DubRightColumn({
         </div>
       )}
 
-      {/* Segment-table toolbar. "Paste translation" is the manual counterpart
-          to Translate All: the user translated elsewhere (ChatGPT/DeepL/a
-          human) and pastes the result onto the timing we already have. */}
-      {pasteTranslations && (
-        <div className="flex items-center justify-end mb-[4px]">
-          <Button
-            variant="subtle"
-            size="sm"
-            onClick={() => setPasteOpen(true)}
-            disabled={!dubSegments.length}
-            title={t('dub.paste_translation_title')}
-            leading={<ClipboardPaste size={10} />}
-          >
-            {t('dub.paste_translation_btn')}
-          </Button>
-        </div>
-      )}
       {pasteOpen && (
         <Suspense fallback={null}>
           <DubPasteTranslationDialog

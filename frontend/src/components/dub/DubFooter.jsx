@@ -164,7 +164,7 @@ export default function DubFooter({
               <FooterBtn
                 sm
                 tone={dubStep === 'done' || !dubSegments.length || isTranslating ? 'idle' : 'pink'}
-                className="!flex-none"
+                className={`!flex-none ${dubStep !== 'done' && dubSegments.length && !isTranslating ? 'dub-generate-btn' : ''}`}
                 onClick={onGenerateClick}
                 disabled={!dubSegments.length || isTranslating}
                 icon={<Play size={11} />}

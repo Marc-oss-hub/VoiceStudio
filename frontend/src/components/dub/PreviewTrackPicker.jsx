@@ -1,7 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { AudioLines, ChevronDown, Search } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import LanguageCode from '../LanguageCode';
+import TrackLanguageFlag from './TrackLanguageFlag';
 import { LANG_CODES } from '../../utils/languages';
 
 const FOCUSABLE_SELECTOR =
@@ -15,6 +15,7 @@ export default function PreviewTrackPicker({
   originalLabel,
   searchLabel,
   getTooltip,
+  includeOriginal = true,
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -47,7 +48,7 @@ export default function PreviewTrackPicker({
     [languageByCode, query, tracks],
   );
   const activeLabel =
-    value === 'original'
+    value === 'original' && includeOriginal
       ? originalLabel
       : languageByCode.get(value)?.label || value?.toUpperCase() || originalLabel;
 
@@ -154,10 +155,10 @@ export default function PreviewTrackPicker({
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
       >
-        {value === 'original' ? (
+        {value === 'original' && includeOriginal ? (
           <AudioLines size={12} aria-hidden="true" />
         ) : (
-          <LanguageCode code={value} />
+          <TrackLanguageFlag code={value} />
         )}
         <span className="min-w-0 flex-1 truncate">{activeLabel}</span>
         {value !== 'original' ? (
@@ -205,15 +206,17 @@ export default function PreviewTrackPicker({
                 />
               </div>
               <div className="overflow-y-auto overscroll-contain p-[4px]">
-                <button
-                  type="button"
-                  className={`mb-[2px] flex w-full items-center gap-[7px] rounded-[4px] px-[7px] py-[6px] border-0 text-left text-[0.76rem] cursor-pointer ${value === 'original' ? 'bg-[color-mix(in_srgb,var(--color-brand)_12%,transparent)] text-[var(--chrome-fg)]' : 'bg-transparent text-[var(--chrome-fg-muted)] hover:bg-[var(--chrome-hover-bg)]'}`}
-                  onClick={() => selectTrack('original')}
-                  aria-pressed={value === 'original'}
-                >
-                  <AudioLines size={12} aria-hidden="true" />
-                  {originalLabel}
-                </button>
+                {includeOriginal ? (
+                  <button
+                    type="button"
+                    className={`mb-[2px] flex w-full items-center gap-[7px] rounded-[4px] px-[7px] py-[6px] border-0 text-left text-[0.76rem] cursor-pointer ${value === 'original' ? 'bg-[color-mix(in_srgb,var(--color-brand)_12%,transparent)] text-[var(--chrome-fg)]' : 'bg-transparent text-[var(--chrome-fg-muted)] hover:bg-[var(--chrome-hover-bg)]'}`}
+                    onClick={() => selectTrack('original')}
+                    aria-pressed={value === 'original'}
+                  >
+                    <AudioLines size={12} aria-hidden="true" />
+                    {originalLabel}
+                  </button>
+                ) : null}
                 <div
                   className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-[2px]"
                   data-testid="preview-track-grid"
@@ -227,7 +230,7 @@ export default function PreviewTrackPicker({
                       title={getTooltip?.(item.code)}
                       aria-pressed={value === item.code}
                     >
-                      <LanguageCode code={item.code} />
+                      <TrackLanguageFlag code={item.code} />
                       <span className="min-w-0 flex-1 truncate">{item.label}</span>
                       <span className="[font-family:var(--font-mono)] text-[0.58rem] uppercase text-[var(--chrome-fg-dim)]">
                         {item.code}

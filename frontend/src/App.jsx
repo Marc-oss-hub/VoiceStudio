@@ -913,7 +913,7 @@ function App() {
   const saveProject = async () => {
     if (dubStep === 'idle') {
       toast.error(i18n.t('app.toast_upload_first'));
-      return;
+      return false;
     }
     const name = activeProjectName || dubFilename || `Project ${new Date().toLocaleString()}`;
     const statePayload = {
@@ -955,8 +955,10 @@ function App() {
         activeProjectId ? i18n.t('app.toast_project_saved') : i18n.t('app.toast_project_created'),
       );
       loadProjects();
+      return true;
     } catch (err) {
       toast.error(i18n.t('app.toast_save_failed', { message: err.message }));
+      return false;
     }
   };
 

@@ -4143,6 +4143,32 @@ html[data-window='widget'] body:has(.capture-pill) {
   font-weight: 600;
 }
 
+/* The single creative action in the otherwise quiet workflow strip. The
+   animated edge gives Generate Dub a little anticipation without turning the
+   whole footer into a neon control surface. */
+@property --dub-generate-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes dub-generate-border {
+  to { --dub-generate-angle: 360deg; }
+}
+.dub-generate-btn {
+  border-color: transparent !important;
+  background:
+    linear-gradient(var(--chrome-accent-bg), var(--chrome-accent-bg)) padding-box,
+    conic-gradient(from var(--dub-generate-angle), var(--chrome-accent), color-mix(in srgb, var(--chrome-fg) 30%, transparent), var(--chrome-accent)) border-box;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--chrome-accent) 8%, transparent), 0 0 14px color-mix(in srgb, var(--chrome-accent) 12%, transparent);
+  animation: dub-generate-border 3.8s linear infinite;
+}
+.dub-generate-btn:hover {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--chrome-accent) 20%, transparent), 0 0 18px color-mix(in srgb, var(--chrome-accent) 20%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dub-generate-btn { animation: none; }
+}
+
 /* ── Column flex that fills height — overrides .studio-panel overflow ── */
 .dub-panel-col {
   margin-bottom: 0;

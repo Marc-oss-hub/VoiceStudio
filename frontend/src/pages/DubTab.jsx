@@ -509,6 +509,10 @@ export default function DubTab(props) {
     setYoutubeCookieFile(null);
     resetDub?.();
   }, [resetDub]);
+  const closeDubAndSave = useCallback(async () => {
+    const saved = await saveProject?.();
+    if (saved !== false) resetDubAndCredentials();
+  }, [resetDubAndCredentials, saveProject]);
   const pipelineBusy =
     isTranslating ||
     multiBatchBusy ||
@@ -728,8 +732,8 @@ export default function DubTab(props) {
             dubDuration={dubDuration}
             dubSegments={dubSegments}
             activeProjectName={activeProjectName}
-            saveProject={saveProject}
             resetDub={resetDubAndCredentials}
+            closeDubAndSave={closeDubAndSave}
             dubStep={dubStep}
             pipelineSteps={pipelineSteps}
             onPipelineStep={onPipelineStep}

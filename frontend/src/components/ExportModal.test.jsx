@@ -4,7 +4,7 @@
 // useTranslation `t`. Rendering with a dub track that equals the primary
 // dubLangCode exercises the exact crashing branch.
 import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import '../i18n';
 import ExportModal from './ExportModal';
 
@@ -43,6 +43,13 @@ function renderModal(extra = {}) {
 describe('ExportModal (regression #183)', () => {
   it('renders with dub tracks incl. the primary dub without throwing', () => {
     expect(() => renderModal()).not.toThrow();
+  });
+
+  it('uses the shared flag-based track picker for the default audio track', () => {
+    renderModal();
+    fireEvent.click(screen.getByRole('button', { name: /default audio track/i }));
+    expect(screen.getByTestId('language-flag-es')).toBeInTheDocument();
+    expect(screen.getByTestId('language-flag-fr')).toBeInTheDocument();
   });
 
   it('renders nothing when closed', () => {
