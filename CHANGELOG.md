@@ -30,6 +30,7 @@ the frozen-backend fallback mirror it for their toolchains.
 - Gallery voice categories now live in one compact menu, with detailed voice filters tucked into an expandable toolbar.
 - Multi-language dubbing now prepares persistent per-language segment variants up front, shows translation readiness per flag, resumes incomplete batches, and reuses ready translations during generation.
 - The Voice workspace now keeps active and saved voices in a left rail, with generated takes using the full-height right rail.
+- Voice profiles now use a quieter inspector: reference details and consent copy expand only when needed, while auditioning stays in focus.
 - The Voice Script editor now opens taller on desktop while staying compact on narrow windows.
 - Stories now opens as a full-height production workspace with a persistent project-and-cast rail, focused manuscript canvas, compact output controls, and a comprehensive working sample loaded by default.
 - The bundled VoiceStudio Demo Voice is now an original warm cinematic alto rendered by OmniVoice itself.

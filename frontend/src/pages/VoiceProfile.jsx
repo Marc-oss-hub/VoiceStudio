@@ -279,32 +279,34 @@ export default function VoiceProfile({ voiceId, onBack, onOpenProject, onDeleted
         audioUrl={audioUrl}
         t={t}
       />
-      <ProfileDetails
-        profile={profile}
-        editing={editing}
-        draft={draft}
-        setDraft={setDraft}
-        saving={saving}
-        cancelEdits={cancelEdits}
-        saveEdits={saveEdits}
-        onUnlock={onUnlock}
-        onRevokeConsent={onRevokeConsent}
-        consentStatement={consentStatement}
-        consentRec={consentRec}
-        consentSubmitting={consentSubmitting}
-        t={t}
-      />
-      <ProfileActivity
-        t={t}
-        testText={testText}
-        setTestText={setTestText}
-        testGenerating={testGenerating}
-        runTest={runTest}
-        testAudioUrl={testAudioUrl}
-        autoPlayPreview={autoPlayPreview}
-        usage={usage}
-        onOpenProject={onOpenProject}
-      />
+      <div className="grid items-start gap-[var(--space-6)] min-[980px]:grid-cols-[minmax(0,1.08fr)_minmax(320px,0.92fr)] min-[980px]:[&>*+*]:border-l min-[980px]:[&>*+*]:border-solid min-[980px]:[&>*+*]:border-[var(--chrome-border)] min-[980px]:[&>*+*]:pl-[var(--space-6)]">
+        <ProfileDetails
+          profile={profile}
+          editing={editing}
+          draft={draft}
+          setDraft={setDraft}
+          saving={saving}
+          cancelEdits={cancelEdits}
+          saveEdits={saveEdits}
+          onUnlock={onUnlock}
+          onRevokeConsent={onRevokeConsent}
+          consentStatement={consentStatement}
+          consentRec={consentRec}
+          consentSubmitting={consentSubmitting}
+          t={t}
+        />
+        <ProfileActivity
+          t={t}
+          testText={testText}
+          setTestText={setTestText}
+          testGenerating={testGenerating}
+          runTest={runTest}
+          testAudioUrl={testAudioUrl}
+          autoPlayPreview={autoPlayPreview}
+          usage={usage}
+          onOpenProject={onOpenProject}
+        />
+      </div>
     </div>
   );
 }
