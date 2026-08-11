@@ -21,6 +21,15 @@ function makeProps(over = {}) {
     dubSegments: [],
     translateQuality: 'fast',
     onExport: vi.fn(),
+    dubProgress: { current: 0, total: 0 },
+    onGenerateClick: vi.fn(),
+    isTranslating: false,
+    multiLangMode: false,
+    multiLangs: [],
+    handleDubGenerate: vi.fn(),
+    qcRunning: false,
+    handleDubQc: vi.fn(),
+    onStop: vi.fn(),
     ...over,
   };
 }
@@ -85,5 +94,31 @@ describe('DubFooter — dismissable / auto-clearing translation error banner', (
     expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
     fireEvent.click(screen.getByRole('button', { name: t('dub.export_btn') }));
     expect(onExport).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps generation, verification, and export together below the workspace', () => {
+    const onGenerateClick = vi.fn();
+    const handleDubQc = vi.fn();
+    const onExport = vi.fn();
+    render(
+      <DubFooter
+        {...makeProps({
+          dubStep: 'done',
+          dubError: '',
+          dubTracks: ['es'],
+          dubSegments: [{ id: '1' }],
+          onGenerateClick,
+          handleDubQc,
+          onExport,
+        })}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: t('dub.generate_dub') }));
+    fireEvent.click(screen.getByRole('button', { name: t('dub.qc_btn') }));
+    fireEvent.click(screen.getByRole('button', { name: t('dub.export_btn') }));
+    expect(onGenerateClick).toHaveBeenCalledOnce();
+    expect(handleDubQc).toHaveBeenCalledOnce();
+    expect(onExport).toHaveBeenCalledOnce();
   });
 });

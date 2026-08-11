@@ -4,12 +4,14 @@ import { describe, expect, it, vi } from 'vitest';
 import i18n from '../../i18n';
 import DubHeader from './DubHeader';
 
+const t = i18n.t.bind(i18n);
+
 describe('DubHeader command bar', () => {
-  it('keeps project identity, compact pipeline, and batch action in one production bar', () => {
+  it('keeps project identity and pipeline clear of workflow actions', () => {
     render(
       <I18nextProvider i18n={i18n}>
         <DubHeader
-          t={i18n.t.bind(i18n)}
+          t={t}
           dubFilename="trying the WORLD'S SMALLEST curling iron."
           dubDuration={63.6}
           dubSegments={Array.from({ length: 14 }, (_, id) => ({ id: String(id) }))}
@@ -17,17 +19,6 @@ describe('DubHeader command bar', () => {
           saveProject={vi.fn()}
           resetDub={vi.fn()}
           dubStep="editing"
-          handleDubStop={vi.fn()}
-          dubProgress={{ current: 0, total: 14 }}
-          onGenerateClick={vi.fn()}
-          isTranslating={false}
-          multiLangMode
-          multiLangs={Array.from({ length: 16 }, (_, id) => ({ code: `l${id}` }))}
-          incrementalPlan={null}
-          handleDubGenerate={vi.fn()}
-          qcRunning={false}
-          handleDubQc={vi.fn()}
-          setExportOpen={vi.fn()}
           pipelineSteps={[]}
           onPipelineStep={vi.fn()}
         />
@@ -41,7 +32,9 @@ describe('DubHeader command bar', () => {
     expect(within(bar).getByRole('list', { name: 'Dubbing pipeline' })).toHaveClass(
       'dub-stepper--command',
     );
-    expect(within(bar).getByRole('button', { name: /Generate 16 dubs/i })).toBeInTheDocument();
+    expect(within(bar).getByRole('button', { name: t('dub.save') })).toBeInTheDocument();
+    expect(within(bar).getByRole('button', { name: t('dub.reset') })).toBeInTheDocument();
+    expect(within(bar).queryByRole('button', { name: /Generate/i })).not.toBeInTheDocument();
     expect(bar).toHaveClass('dub-command-bar');
   });
 });

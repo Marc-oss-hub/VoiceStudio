@@ -731,17 +731,6 @@ export default function DubTab(props) {
             saveProject={saveProject}
             resetDub={resetDubAndCredentials}
             dubStep={dubStep}
-            handleDubStop={handleDubStop}
-            dubProgress={dubProgress}
-            onGenerateClick={onGenerateClick}
-            isTranslating={isTranslating || multiBatchBusy}
-            multiLangMode={multiLangMode}
-            multiLangs={batchTargets}
-            incrementalPlan={incrementalPlan}
-            handleDubGenerate={handleDubGenerate}
-            qcRunning={qcRunning}
-            handleDubQc={handleDubQc}
-            setExportOpen={setExportOpen}
             pipelineSteps={pipelineSteps}
             onPipelineStep={onPipelineStep}
           />
@@ -874,6 +863,15 @@ export default function DubTab(props) {
             dubSegments={dubSegments}
             translateQuality={translateQuality}
             onExport={() => setExportOpen(true)}
+            dubProgress={dubProgress}
+            onGenerateClick={onGenerateClick}
+            isTranslating={isTranslating || multiBatchBusy}
+            multiLangMode={multiLangMode}
+            multiLangs={batchTargets}
+            handleDubGenerate={handleDubGenerate}
+            qcRunning={qcRunning}
+            handleDubQc={handleDubQc}
+            onStop={handleDubStop}
           />
         </div>
       )}

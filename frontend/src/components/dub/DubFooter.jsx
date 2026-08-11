@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
-import { Check, AlertCircle, Download, X } from 'lucide-react';
+import { Check, AlertCircle, Download, Loader, Play, ShieldCheck, Square, X } from 'lucide-react';
 import { Badge, Button } from '../../ui';
 import DubFailureNotice from './DubFailureNotice';
+import FooterBtn from './FooterBtn';
 
 // How long a translate/pipeline error banner lingers before it self-clears.
 // Long enough to read a short message; the × and corrective-action clears are
@@ -19,6 +20,15 @@ export default function DubFooter({
   dubSegments,
   translateQuality,
   onExport,
+  dubProgress,
+  onGenerateClick,
+  isTranslating,
+  multiLangMode,
+  multiLangs,
+  handleDubGenerate,
+  qcRunning,
+  handleDubQc,
+  onStop,
 }) {
   // Auto-clear the error banner after a grace period so it can't get stuck
   // forever (issue: "TRANSLATION FAILED banner never goes away"). Skipped
@@ -31,6 +41,14 @@ export default function DubFooter({
     const id = setTimeout(() => onDismissError(), ERROR_AUTOCLEAR_MS);
     return () => clearTimeout(id);
   }, [canAutoClear, dubError, onDismissError]);
+
+  const generateLabel =
+    multiLangMode && multiLangs.length > 1
+      ? t('dub.generate_dub_multi', {
+          count: multiLangs.length,
+          defaultValue: 'Generate {{count}} dubs',
+        })
+      : t('dub.generate_dub');
 
   return (
     <div className="px-[var(--space-3)] py-[4px] shrink-0 bg-[var(--chrome-bg)] border border-transparent">
@@ -56,17 +74,6 @@ export default function DubFooter({
                 </span>
               )}
           </div>
-          <Button
-            type="button"
-            variant="primary"
-            size="sm"
-            className="shrink-0"
-            onClick={onExport}
-            aria-label={t('dub.export_btn')}
-          >
-            <Download size={11} />
-            {t('dub.export_btn')}
-          </Button>
         </div>
       )}
       {dubError && (
@@ -126,7 +133,77 @@ export default function DubFooter({
           </div>
         );
       })()}
-      {/* Generate / Export / Stop actions moved to the header bar (dub-head__primary). */}
+      <div className="mt-[var(--space-2)] flex flex-wrap items-center justify-end gap-[6px] border-t border-solid border-[var(--chrome-border)] pt-[var(--space-2)]">
+        {dubStep === 'stopping' ? (
+          <FooterBtn
+            sm
+            tone="stopping"
+            disabled
+            className="!flex-none"
+            icon={<Loader className="spinner" size={10} />}
+            label={t('dub.stopping')}
+          />
+        ) : dubStep === 'generating' ? (
+          <FooterBtn
+            sm
+            tone="danger"
+            className="!flex-none"
+            onClick={onStop}
+            icon={<Square size={9} />}
+            label={t('dub.stop_progress', {
+              current: dubProgress.current,
+              total: dubProgress.total,
+            })}
+          />
+        ) : (
+          <>
+            <FooterBtn
+              sm
+              tone={dubSegments.length && !isTranslating ? 'pink' : 'idle'}
+              className="!flex-none"
+              onClick={onGenerateClick}
+              disabled={!dubSegments.length || isTranslating}
+              icon={<Play size={11} />}
+              label={generateLabel}
+              aria-label={generateLabel}
+            />
+            {dubStep === 'done' && incrementalPlan?.stale?.length > 0 ? (
+              <FooterBtn
+                sm
+                tone="pink"
+                className="!flex-none"
+                onClick={() =>
+                  handleDubGenerate({ regenOnly: incrementalPlan.stale, preview: true })
+                }
+                icon={<Play size={11} />}
+                label={t('dub.regen_changed', { count: incrementalPlan.stale.length })}
+              />
+            ) : null}
+          </>
+        )}
+        {dubStep === 'done' ? (
+          <FooterBtn
+            sm
+            tone="idle"
+            className="!flex-none"
+            disabled={qcRunning || !dubSegments.length}
+            onClick={handleDubQc}
+            icon={qcRunning ? <Loader className="spinner" size={11} /> : <ShieldCheck size={11} />}
+            label={t('dub.qc_btn', { defaultValue: 'Verify dub timing (second-pass check)' })}
+          />
+        ) : null}
+        <Button
+          type="button"
+          variant="primary"
+          size="sm"
+          disabled={dubStep !== 'done' && !dubSegments.length}
+          onClick={onExport}
+          aria-label={t('dub.export_btn')}
+        >
+          <Download size={11} />
+          {t('dub.export_btn')}
+        </Button>
+      </div>
     </div>
   );
 }
