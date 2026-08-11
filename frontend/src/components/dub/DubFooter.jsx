@@ -42,9 +42,7 @@ export default function DubFooter({
                 <Check size={12} />
               </span>
             ) : null}
-            <span className="truncate">
-              {t('dub.languages_selected', { count: dubTracks.length })}
-            </span>
+            <span className="truncate">{t('dub.tracks_ready', { count: dubTracks.length })}</span>
             {incrementalPlan && incrementalPlan.stale?.length > 0 && (
               <Badge tone="warn">
                 {t('dub.segments_changed', { count: incrementalPlan.stale.length })}

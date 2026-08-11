@@ -851,6 +851,7 @@
     "delete_selected": "Verwijderen",
     "clear_selection": "Duidelijk",
     "tracks_done": "Klaar! Nummers: {{tracks}}",
+    "tracks_ready": "{{count}} tracks gereed",
     "segments_changed": "{{count}} segment(en) gewijzigd sinds laatste generatie",
     "all_up_to_date": "alle {{count}} segmenten up-to-date",
     "output_options": "Uitvoeropties:",

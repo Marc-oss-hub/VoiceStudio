@@ -851,6 +851,7 @@
     "delete_selected": "ลบ",
     "clear_selection": "ชัดเจน",
     "tracks_done": "เสร็จแล้ว! แทร็ก: {{tracks}}",
+    "tracks_ready": "{{count}} แทร็กพร้อมแล้ว",
     "segments_changed": "{{count}} เซ็กเมนต์เปลี่ยนแปลงตั้งแต่การสร้างครั้งล่าสุด",
     "all_up_to_date": "{{count}} เซ็กเมนต์ทั้งหมดเป็นปัจจุบัน",
     "output_options": "ตัวเลือกเอาต์พุต:",

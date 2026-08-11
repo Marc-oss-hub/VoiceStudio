@@ -851,6 +851,7 @@
     "delete_selected": "Удалить",
     "clear_selection": "Прозрачный",
     "tracks_done": "Сделанный! Треки: {{tracks}}",
+    "tracks_ready": "{{count}} дорожек готово",
     "segments_changed": "{{count}} сегментов изменено с момента последней генерации",
     "all_up_to_date": "все сегменты {{count}} актуальны",
     "output_options": "Варианты вывода:",

@@ -1139,6 +1139,7 @@
     "delete_selected": "Delete",
     "clear_selection": "Clear",
     "tracks_done": "Done! Tracks: {{tracks}}",
+    "tracks_ready": "{{count}} tracks ready",
     "segments_changed": "{{count}} segment(s) changed since last generate",
     "all_up_to_date": "all {{count}} segments up to date",
     "output_options": "Output Options:",

@@ -851,6 +851,7 @@
     "delete_selected": "Hapus",
     "clear_selection": "Jelas",
     "tracks_done": "Selesai! Trek: {{tracks}}",
+    "tracks_ready": "{{count}} trek siap",
     "segments_changed": "{{count}} segmen berubah sejak pembuatan terakhir",
     "all_up_to_date": "semua segmen {{count}} diperbarui",
     "output_options": "Opsi Keluaran:",

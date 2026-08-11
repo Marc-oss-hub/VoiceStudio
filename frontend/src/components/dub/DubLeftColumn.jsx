@@ -17,6 +17,7 @@ import { Button, Segmented, Progress } from '../../ui';
 import { useAppStore } from '../../store';
 import WaveformTimeline from '../WaveformTimeline';
 import MultiLangPicker from '../MultiLangPicker';
+import PreviewTrackPicker from './PreviewTrackPicker';
 import { API } from '../../api/client';
 import { dubListTracks } from '../../api/dub';
 import { LANG_CODES } from '../../utils/languages';
@@ -255,33 +256,15 @@ export default function DubLeftColumn({
   return (
     <div className="studio-panel dub-panel-col">
       {hasDubbedTrack && (
-        <div className="mb-[5px] flex items-center gap-[7px] rounded-[6px] border border-solid border-[var(--chrome-border)] bg-[var(--chrome-bg)] px-[8px] py-[5px]">
-          <label
-            htmlFor="dub-preview-track"
-            className="shrink-0 [font-family:var(--chrome-font-mono)] text-[0.6rem] font-semibold uppercase tracking-[var(--chrome-label-track)] text-[var(--chrome-fg-muted)]"
-          >
-            {t('dub.preview_language', { defaultValue: 'Preview language' })}
-          </label>
-          <select
-            id="dub-preview-track"
-            className="input-base !min-w-0 !flex-1 !py-[3px] !text-[0.68rem]"
-            value={previewMode}
-            onChange={(event) => selectPreviewTrack(event.target.value)}
-          >
-            <option value="original">{t('dub.original_audio')}</option>
-            {dubTracks.map((code) => {
-              const label = LANG_CODES.find((language) => language.code === code)?.label;
-              return (
-                <option key={code} value={code} title={trackTooltip(code)}>
-                  {label || code.toUpperCase()} · {code.toUpperCase()}
-                </option>
-              );
-            })}
-          </select>
-          <span className="shrink-0 [font-family:var(--font-mono)] text-[0.58rem] text-[var(--chrome-fg-dim)]">
-            {dubTracks.length}
-          </span>
-        </div>
+        <PreviewTrackPicker
+          value={previewMode}
+          tracks={dubTracks}
+          onChange={selectPreviewTrack}
+          label={t('dub.preview_language', { defaultValue: 'Preview language' })}
+          originalLabel={t('dub.original_audio')}
+          searchLabel={t('dub.search_languages')}
+          getTooltip={trackTooltip}
+        />
       )}
       <WaveformTimeline
         key={videoSrc}

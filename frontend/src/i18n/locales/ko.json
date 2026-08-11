@@ -851,6 +851,7 @@
     "delete_selected": "삭제",
     "clear_selection": "지우기",
     "tracks_done": "완료! 트랙: {{tracks}}",
+    "tracks_ready": "{{count}}개 트랙 준비 완료",
     "segments_changed": "마지막 생성 이후 {{count}} 세그먼트가 변경되었습니다.",
     "all_up_to_date": "모든 {{count}} 세그먼트가 최신 상태입니다.",
     "output_options": "출력 옵션:",

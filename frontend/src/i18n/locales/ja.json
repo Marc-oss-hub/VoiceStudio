@@ -851,6 +851,7 @@
     "delete_selected": "削除",
     "clear_selection": "クリア",
     "tracks_done": "完了しました！トラック: {{tracks}}",
+    "tracks_ready": "{{count}} トラック準備完了",
     "segments_changed": "{{count}} セグメントが最後の生成以降に変更されました",
     "all_up_to_date": "すべての {{count}} セグメントは最新です",
     "output_options": "出力オプション:",

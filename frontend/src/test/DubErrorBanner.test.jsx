@@ -81,7 +81,7 @@ describe('DubFooter — dismissable / auto-clearing translation error banner', (
       />,
     );
 
-    expect(screen.getByText(t('dub.languages_selected', { count: 3 }))).toBeInTheDocument();
+    expect(screen.getByText(t('dub.tracks_ready', { count: 3 }))).toBeInTheDocument();
     expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
     fireEvent.click(screen.getByRole('button', { name: t('dub.export_btn') }));
     expect(onExport).toHaveBeenCalledTimes(1);

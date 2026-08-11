@@ -851,6 +851,7 @@
     "delete_selected": "Xóa",
     "clear_selection": "Xóa",
     "tracks_done": "Xong! Bài hát: {{tracks}}",
+    "tracks_ready": "{{count}} bản nhạc đã sẵn sàng",
     "segments_changed": "{{count}} phân đoạn đã thay đổi kể từ lần tạo cuối cùng",
     "all_up_to_date": "tất cả các phân đoạn {{count}} được cập nhật",
     "output_options": "Tùy chọn đầu ra:",

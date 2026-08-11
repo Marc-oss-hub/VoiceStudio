@@ -851,6 +851,7 @@
     "delete_selected": "Видалити",
     "clear_selection": "ясно",
     "tracks_done": "Готово! Доріжки: {{tracks}}",
+    "tracks_ready": "{{count}} доріжок готово",
     "segments_changed": "{{count}} сегмент(ів) змінено з моменту останнього створення",
     "all_up_to_date": "усі сегменти {{count}} актуальні",
     "output_options": "Параметри виведення:",

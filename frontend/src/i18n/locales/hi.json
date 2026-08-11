@@ -851,6 +851,7 @@
     "delete_selected": "हटाएँ",
     "clear_selection": "स्पष्ट",
     "tracks_done": "हो गया! ट्रैक: {{tracks}}",
+    "tracks_ready": "{{count}} ट्रैक तैयार",
     "segments_changed": "पिछली बार उत्पन्न होने के बाद से {{count}} खंड बदल गए हैं",
     "all_up_to_date": "सभी {{count}} खंड अद्यतित हैं",
     "output_options": "आउटपुट विकल्प:",

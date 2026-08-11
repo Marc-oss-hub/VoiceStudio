@@ -851,6 +851,7 @@
     "delete_selected": "刪除",
     "clear_selection": "清除",
     "tracks_done": "完成！曲目：{{tracks}}",
+    "tracks_ready": "{{count}} 條軌道已就緒",
     "segments_changed": "自上次生成以來 {{count}} 段已更改",
     "all_up_to_date": "所有 {{count}} 段都是最新的",
     "output_options": "輸出選項：",

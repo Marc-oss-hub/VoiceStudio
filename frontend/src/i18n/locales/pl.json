@@ -851,6 +851,7 @@
     "delete_selected": "Usuń",
     "clear_selection": "Jasne",
     "tracks_done": "Gotowe! Utwory: {{tracks}}",
+    "tracks_ready": "{{count}} ścieżek gotowych",
     "segments_changed": "{{count}} segmenty uległy zmianie od ostatniego wygenerowania",
     "all_up_to_date": "wszystkie segmenty {{count}} są aktualne",
     "output_options": "Opcje wyjściowe:",

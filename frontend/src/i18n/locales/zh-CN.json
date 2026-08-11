@@ -810,6 +810,7 @@
     "delete_selected": "删除",
     "clear_selection": "清除",
     "tracks_done": "完成！轨道：{{tracks}}",
+    "tracks_ready": "{{count}} 条轨道已就绪",
     "segments_changed": "{{count}} 个片段在上次生成后发生了更改",
     "all_up_to_date": "全部 {{count}} 个片段已是最新",
     "output_options": "输出选项：",

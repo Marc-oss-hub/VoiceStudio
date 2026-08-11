@@ -851,6 +851,7 @@
     "delete_selected": "Excluir",
     "clear_selection": "Limpar",
     "tracks_done": "Pronto! Faixas: {{tracks}}",
+    "tracks_ready": "{{count}} faixas prontas",
     "segments_changed": "{{count}} segmento(s) alterado(s) desde a última geração",
     "all_up_to_date": "todos os segmentos {{count}} atualizados",
     "output_options": "Opções de saída:",
