@@ -167,13 +167,13 @@ describe('Launchpad feature cards (full-width grid)', () => {
     expect(container.querySelector('.lp-action-card--raised')).toBeNull();
   });
 
-  it('waveform strips are decorative only (aria-hidden, 7 bars each)', () => {
+  it('keeps a compact decorative open affordance on every feature', () => {
     const { container } = renderShell(makeProps());
     for (const card of cardEls(container)) {
-      const wave = card.querySelector('.lp-card-wave');
-      expect(wave).not.toBeNull();
-      expect(wave.getAttribute('aria-hidden')).toBe('true');
-      expect(wave.querySelectorAll('.lp-card-wave__bar')).toHaveLength(7);
+      expect(card.querySelector('[data-testid="launchpad-card-open"]')).toHaveAttribute(
+        'aria-hidden',
+        'true',
+      );
     }
   });
 
