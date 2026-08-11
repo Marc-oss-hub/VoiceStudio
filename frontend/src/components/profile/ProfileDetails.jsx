@@ -141,14 +141,12 @@ export default function ProfileDetails({
             <p className="m-0 text-[var(--text-sm)] leading-[1.5] text-fg-muted">
               {t('voice_profile.consent_explain')}
             </p>
-            <details className="text-[var(--text-sm)] text-fg-muted">
-              <summary className="cursor-pointer font-medium">
-                {t('voice_profile.consent_record')}
-              </summary>
+            <div className="text-[var(--text-sm)] text-fg-muted">
+              <div className="font-medium">{t('voice_profile.consent_record')}</div>
               <blockquote className="mb-0 mt-[var(--space-3)] border-l-2 border-[var(--color-brand)] pl-[var(--space-3)] leading-[1.55]">
                 “{consentStatement}”
               </blockquote>
-            </details>
+            </div>
             {consentRec.isRecording ? (
               <Button
                 variant="danger"

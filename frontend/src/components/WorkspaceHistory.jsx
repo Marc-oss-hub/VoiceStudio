@@ -77,6 +77,8 @@ function DubMediaPreview({ item, inputType }) {
       <img
         src={`${API}/dub/thumb/${encodeURIComponent(item.id)}`}
         alt=""
+        width="88"
+        height="54"
         loading="lazy"
         decoding="async"
         className="absolute inset-0 h-full w-full object-cover"

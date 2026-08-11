@@ -4,7 +4,10 @@ import { Plus, Search, X } from 'lucide-react';
 import { POPULAR_LANGS } from '../utils/constants';
 import { LANG_CODES } from '../utils/languages';
 import { useTranslation } from 'react-i18next';
-import LanguageFlag from './LanguageFlag';
+import LanguageCode from './LanguageCode';
+
+const FOCUSABLE_SELECTOR =
+  'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])';
 
 /** Compact multi-language selector for batch dubbing. */
 export default function MultiLangPicker({
@@ -33,9 +36,30 @@ export default function MultiLangPicker({
       if (!insideTrigger && !insideMenu) setDropOpen(false);
     };
     const onKeyDown = (event) => {
-      if (event.key !== 'Escape') return;
-      setDropOpen(false);
-      triggerRef.current?.focus();
+      if (event.key === 'Escape') {
+        setDropOpen(false);
+        triggerRef.current?.focus();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = [...(menuRef.current?.querySelectorAll(FOCUSABLE_SELECTOR) || [])];
+      if (!focusable.length) {
+        event.preventDefault();
+        menuRef.current?.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (
+        event.shiftKey &&
+        (document.activeElement === first || !menuRef.current?.contains(document.activeElement))
+      ) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener('mousedown', onMouseDown);
     document.addEventListener('keydown', onKeyDown);
@@ -81,7 +105,9 @@ export default function MultiLangPicker({
   }, [dropOpen]);
 
   useEffect(() => {
-    if (dropOpen) inputRef.current?.focus();
+    if (!dropOpen) return;
+    const prefersKeyboard = window.matchMedia?.('(pointer: fine)').matches ?? true;
+    (prefersKeyboard ? inputRef.current : menuRef.current)?.focus();
   }, [dropOpen]);
 
   const selectedCodes = useMemo(() => new Set(selected.map((item) => item.code)), [selected]);
@@ -126,7 +152,7 @@ export default function MultiLangPicker({
       className="flex min-w-0 items-center gap-[7px] rounded-[4px] px-[7px] py-[5px] bg-transparent border-0 text-[color:var(--chrome-fg)] [font-family:var(--font-sans)] text-[0.76rem] cursor-pointer text-left [transition:background_0.1s] hover:bg-[var(--chrome-hover-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--chrome-accent)]"
       onClick={() => addLang(item.lang ?? item.label, item.code)}
     >
-      <LanguageFlag code={item.code} />
+      <LanguageCode code={item.code} />
       <span className="[font-family:var(--font-mono)] text-[0.64rem] text-[color:var(--chrome-accent)] min-w-[24px] font-semibold uppercase">
         {item.code}
       </span>
@@ -173,7 +199,9 @@ export default function MultiLangPicker({
               id={menuId}
               className="multi-lang__drop"
               role="dialog"
+              aria-modal="true"
               aria-label={t('dub.add_language')}
+              tabIndex={-1}
               data-testid="multi-lang-dropdown"
               style={
                 menuPos
@@ -228,7 +256,7 @@ export default function MultiLangPicker({
                               disabled={!onSelect}
                               aria-pressed={activeCode === item.code}
                             >
-                              <LanguageFlag code={item.code} />
+                              <LanguageCode code={item.code} />
                               <span className="min-w-0 flex-1 truncate text-left">{item.lang}</span>
                               <span className="[font-family:var(--font-mono)] text-[0.58rem] uppercase text-[color:var(--chrome-fg-dim)]">
                                 {item.code}

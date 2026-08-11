@@ -128,6 +128,8 @@ describe('WorkspaceHistory dub media previews', () => {
       'src',
       expect.stringContaining('/dub/thumb/uploaded-video'),
     );
+    expect(screen.getByTestId('dub-thumbnail-youtube-job')).toHaveAttribute('width', '88');
+    expect(screen.getByTestId('dub-thumbnail-youtube-job')).toHaveAttribute('height', '54');
   });
 
   it('shows a waveform tile instead of a thumbnail for audio-only dubs', () => {

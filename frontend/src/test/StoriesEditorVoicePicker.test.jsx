@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import '../i18n';
+import i18n from '../i18n';
 
 // The Stories cast + per-line pickers migrated from native <select>s to the
 // shared, gallery-enabled VoiceSelector (#1220). VoiceSelector reads /archetypes
@@ -80,10 +80,19 @@ describe('StoriesEditor voice pickers (#1220)', () => {
     expect(screen.getByRole('listitem')).toHaveClass('stories-line');
   });
 
-  it('loads a comprehensive working sample by default', async () => {
+  it('keeps a new workspace empty until the user opts into the sample', async () => {
     useAppStore.setState({ storyTracks: [], storyProjects: [], currentProjectId: null });
     renderEditor();
 
+    expect(useAppStore.getState().storyTracks).toEqual([]);
+    expect(useAppStore.getState().storyProjects).toEqual([]);
+    expect(screen.getByText(i18n.t('stories.emptyText'))).toBeInTheDocument();
+
+    fireEvent.click(
+      within(screen.getByRole('main')).getByRole('button', {
+        name: i18n.t('audiobook.load_sample'),
+      }),
+    );
     await waitFor(() => expect(useAppStore.getState().storyTracks).toHaveLength(11));
     const state = useAppStore.getState();
     expect(state.cast.map((member) => member.name)).toEqual(['Narrator', 'Mara', 'Cole']);

@@ -148,6 +148,11 @@ export default function ProfileHeader({
                 <span className="inline-flex items-center gap-[4px] text-[0.65rem] text-fg-subtle">
                   <Clock size={9} /> {createdDate}
                 </span>
+                {isDesign && profile.seed != null && String(profile.seed) !== '' ? (
+                  <Badge tone="violet" size="xs">
+                    {t('clone.seed_label')} {profile.seed}
+                  </Badge>
+                ) : null}
               </div>
             </div>
           </div>

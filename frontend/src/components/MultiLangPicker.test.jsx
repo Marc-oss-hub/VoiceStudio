@@ -3,8 +3,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import i18n from '../i18n';
 import MultiLangPicker from './MultiLangPicker';
-import { LANGUAGE_FLAGS } from './LanguageFlag';
-import { LANG_CODES } from '../utils/languages';
 
 const rect = (overrides = {}) => ({
   x: 40,
@@ -22,10 +20,6 @@ const rect = (overrides = {}) => ({
 afterEach(() => vi.restoreAllMocks());
 
 describe('MultiLangPicker', () => {
-  it('keeps a representative vector flag mapped for every supported language', () => {
-    expect(LANG_CODES.filter(({ code }) => !LANGUAGE_FLAGS[code])).toEqual([]);
-  });
-
   it('portals outside clipping ancestors and flips above a bottom-edge trigger', () => {
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1000 });
     Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
@@ -84,9 +78,9 @@ describe('MultiLangPicker', () => {
 
     fireEvent.click(summary);
     const grid = screen.getByTestId('multi-lang-selected-grid');
-    expect(within(grid).getByTestId('language-flag-en')).toBeInTheDocument();
-    expect(within(grid).getByTestId('language-flag-es')).toBeInTheDocument();
-    expect(within(grid).getByTestId('language-flag-ja')).toBeInTheDocument();
+    expect(within(grid).getByTestId('language-code-en')).toHaveTextContent('EN');
+    expect(within(grid).getByTestId('language-code-es')).toHaveTextContent('ES');
+    expect(within(grid).getByTestId('language-code-ja')).toHaveTextContent('JA');
   });
 
   it('shows readiness and lets a prepared language be reviewed', () => {
@@ -111,14 +105,27 @@ describe('MultiLangPicker', () => {
     expect(onSelect).toHaveBeenCalledWith('ja');
   });
 
-  it('renders searchable language results as responsive flag rows', () => {
+  it('renders searchable language results with neutral language codes', () => {
     render(<MultiLangPicker selected={[]} onChange={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: 'Add language' }));
 
     const allLanguages = screen.getByTestId('multi-lang-all-grid');
     expect(allLanguages.className).toContain('grid-cols-[repeat(auto-fit,minmax(140px,1fr))]');
     for (const row of within(allLanguages).getAllByRole('button')) {
-      expect(row.querySelector('[data-language-flag]')).not.toBeNull();
+      expect(row.querySelector('[data-language-code]')).not.toBeNull();
     }
+  });
+
+  it('traps keyboard focus in the open language dialog', () => {
+    render(<MultiLangPicker selected={[]} onChange={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Add language' }));
+    const dialog = screen.getByRole('dialog', { name: 'Add language' });
+    const focusable = dialog.querySelectorAll('button:not([disabled]), input:not([disabled])');
+    const last = focusable[focusable.length - 1];
+    last.focus();
+
+    fireEvent.keyDown(document, { key: 'Tab' });
+    expect(focusable[0]).toHaveFocus();
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
   });
 });

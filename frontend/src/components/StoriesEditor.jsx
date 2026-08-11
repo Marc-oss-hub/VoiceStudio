@@ -170,8 +170,6 @@ const STORY_TONES = [
   { tag: '[dissatisfaction-hnn]', icon: Annoyed, key: 'dissatisfaction' },
 ];
 
-const DEFAULT_SAMPLE_KEY = 'ov_stories_default_sample_v2';
-
 export default function StoriesEditor({ profiles = [] }) {
   const { t } = useTranslation();
 
@@ -242,7 +240,6 @@ export default function StoriesEditor({ profiles = [] }) {
   const trackTextRefs = useRef(new Map());
   const fileInputRef = useRef(null);
   const dragId = useRef(null);
-  const sampleBootstrapRef = useRef(false);
   const [dragOver, setDragOver] = useState(null);
 
   // ── Cast ────────────────────────────────────────────────────────────────
@@ -365,20 +362,6 @@ export default function StoriesEditor({ profiles = [] }) {
     toast.success(t('stories.projectSaved'));
   }, [createSampleStory, t, tracks]);
 
-  useEffect(() => {
-    if (sampleBootstrapRef.current) return;
-    if (currentProjectId || storyProjects.length || tracks.some((track) => track.text.trim()))
-      return;
-    sampleBootstrapRef.current = true;
-    try {
-      if (localStorage.getItem(DEFAULT_SAMPLE_KEY)) return;
-      localStorage.setItem(DEFAULT_SAMPLE_KEY, '1');
-    } catch {
-      // Storage can be unavailable in privacy modes; the pristine-state guard
-      // still prevents duplicate projects during this mounted session.
-    }
-    createSampleStory();
-  }, [createSampleStory, currentProjectId, storyProjects.length, tracks]);
   useEffect(() => {
     if (
       currentProject?.name !== SAMPLE_STORY_NAME ||

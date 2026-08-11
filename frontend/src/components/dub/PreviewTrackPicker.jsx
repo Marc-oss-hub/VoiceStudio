@@ -1,8 +1,11 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { AudioLines, ChevronDown, Search } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import LanguageFlag from '../LanguageFlag';
+import LanguageCode from '../LanguageCode';
 import { LANG_CODES } from '../../utils/languages';
+
+const FOCUSABLE_SELECTOR =
+  'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])';
 
 export default function PreviewTrackPicker({
   value,
@@ -56,9 +59,30 @@ export default function PreviewTrackPicker({
       }
     };
     const onKeyDown = (event) => {
-      if (event.key !== 'Escape') return;
-      setOpen(false);
-      triggerRef.current?.focus();
+      if (event.key === 'Escape') {
+        setOpen(false);
+        triggerRef.current?.focus();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = [...(menuRef.current?.querySelectorAll(FOCUSABLE_SELECTOR) || [])];
+      if (!focusable.length) {
+        event.preventDefault();
+        menuRef.current?.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (
+        event.shiftKey &&
+        (document.activeElement === first || !menuRef.current?.contains(document.activeElement))
+      ) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener('mousedown', onMouseDown);
     document.addEventListener('keydown', onKeyDown);
@@ -100,7 +124,9 @@ export default function PreviewTrackPicker({
   }, [open]);
 
   useEffect(() => {
-    if (open) inputRef.current?.focus();
+    if (!open) return;
+    const prefersKeyboard = window.matchMedia?.('(pointer: fine)').matches ?? true;
+    (prefersKeyboard ? inputRef.current : menuRef.current)?.focus();
   }, [open]);
 
   const selectTrack = (code) => {
@@ -131,7 +157,7 @@ export default function PreviewTrackPicker({
         {value === 'original' ? (
           <AudioLines size={12} aria-hidden="true" />
         ) : (
-          <LanguageFlag code={value} />
+          <LanguageCode code={value} />
         )}
         <span className="min-w-0 flex-1 truncate">{activeLabel}</span>
         {value !== 'original' ? (
@@ -149,7 +175,9 @@ export default function PreviewTrackPicker({
               id={menuId}
               className="multi-lang__drop"
               role="dialog"
+              aria-modal="true"
               aria-label={label}
+              tabIndex={-1}
               style={
                 menuPos
                   ? {
@@ -199,7 +227,7 @@ export default function PreviewTrackPicker({
                       title={getTooltip?.(item.code)}
                       aria-pressed={value === item.code}
                     >
-                      <LanguageFlag code={item.code} />
+                      <LanguageCode code={item.code} />
                       <span className="min-w-0 flex-1 truncate">{item.label}</span>
                       <span className="[font-family:var(--font-mono)] text-[0.58rem] uppercase text-[var(--chrome-fg-dim)]">
                         {item.code}
