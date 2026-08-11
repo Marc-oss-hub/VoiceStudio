@@ -14,14 +14,19 @@ import { useAppStore } from '../store';
 // and on a failed translate: skip that pick's generate, keep going, report
 // the skipped languages in a final toast.
 
-const captured = vi.hoisted(() => ({ header: [] }));
+const captured = vi.hoisted(() => ({ header: [], left: [] }));
 vi.mock('../components/dub/DubHeader', () => ({
   default: (props) => {
     captured.header.push(props);
     return null;
   },
 }));
-vi.mock('../components/dub/DubLeftColumn', () => ({ default: () => null }));
+vi.mock('../components/dub/DubLeftColumn', () => ({
+  default: (props) => {
+    captured.left.push(props);
+    return null;
+  },
+}));
 vi.mock('../components/dub/DubRightColumn', () => ({ default: () => null }));
 vi.mock('../components/dub/DubFooter', () => ({ default: () => null }));
 vi.mock('../components/dub/DubPipelineStepper', () => ({ default: () => null }));
@@ -132,6 +137,7 @@ describe('DubTab — multi-language generate translates each language first (P1.
   beforeEach(() => {
     useAppStore.setState(baseState, true);
     captured.header.length = 0;
+    captured.left.length = 0;
   });
   afterEach(() => {
     vi.restoreAllMocks();
@@ -151,6 +157,51 @@ describe('DubTab — multi-language generate translates each language first (P1.
     expect(handleDubGenerate).toHaveBeenNthCalledWith(2, {
       langOverride: { language: 'Spanish', language_code: 'es' },
     });
+  });
+
+  it('Translate All prepares every selected language without generating audio', async () => {
+    const { calls, handleDubGenerate } = setup();
+    const translateSelected = captured.left.at(-1).handleTranslateAll;
+    await act(async () => {
+      await translateSelected();
+    });
+    expect(calls).toEqual(['translate:bn', 'translate:es']);
+    expect(handleDubGenerate).not.toHaveBeenCalled();
+  });
+
+  it('generation reuses complete prepared variants instead of retranslating them', async () => {
+    const { onGenerateClick, calls } = setup({
+      segments: [
+        {
+          id: '1',
+          text: 'hello',
+          text_original: 'hello',
+          translations: { bn: 'ওহে', es: 'hola' },
+        },
+      ],
+    });
+    await act(async () => {
+      await onGenerateClick();
+    });
+    expect(calls).toEqual(['generate:bn', 'generate:es']);
+  });
+
+  it('resumes an incomplete translation batch without redoing ready languages', async () => {
+    const { calls } = setup({
+      segments: [
+        {
+          id: '1',
+          text: 'hello',
+          text_original: 'hello',
+          translations: { bn: 'ওহে' },
+        },
+      ],
+    });
+    const translateSelected = captured.left.at(-1).handleTranslateAll;
+    await act(async () => {
+      await translateSelected();
+    });
+    expect(calls).toEqual(['translate:es']);
   });
 
   it('a failed translate skips ONLY that language’s generate, continues, and reports it', async () => {

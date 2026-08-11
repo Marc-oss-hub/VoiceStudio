@@ -179,6 +179,89 @@ def _dialect_flags(req, applied: bool) -> dict:
     return {"dialect": req.dialect, "dialect_applied": bool(applied)}
 
 
+def _persist_translation_variants(req: TranslateRequest, response: dict) -> None:
+    """Persist usable per-language text as soon as translation finishes.
+
+    Generation also writes ``segments_i18n``, but batch translation is a
+    reviewable stage of its own. Saving here means a prepared language survives
+    project reloads and generation can resume without paying for translation a
+    second time. Failed rows never overwrite a previously usable variant.
+    """
+    job_id = getattr(req, "job_id", None)
+    if not job_id or not isinstance(response, dict):
+        return
+    try:
+        job = _get_job(job_id)
+        if not isinstance(job, dict):
+            return
+        lang = str(req.target_lang or "").strip()
+        if not lang:
+            return
+        rows = response.get("translated") or []
+        successful: dict[str, dict] = {}
+        for row in rows:
+            if not isinstance(row, dict) or row.get("error"):
+                continue
+            text = row.get("text")
+            if isinstance(text, str) and text.strip():
+                successful[str(row.get("id"))] = row
+
+        i18n = job.setdefault("segments_i18n", {})
+        if not isinstance(i18n, dict):
+            i18n = {}
+            job["segments_i18n"] = i18n
+        texts = i18n.setdefault(lang, {})
+        if not isinstance(texts, dict):
+            texts = {}
+            i18n[lang] = texts
+        texts.update({seg_id: row["text"] for seg_id, row in successful.items()})
+
+        plans_by_lang = job.setdefault("translation_plans", {})
+        if not isinstance(plans_by_lang, dict):
+            plans_by_lang = {}
+            job["translation_plans"] = plans_by_lang
+        plans = plans_by_lang.setdefault(lang, {})
+        if not isinstance(plans, dict):
+            plans = {}
+            plans_by_lang[lang] = plans
+        for seg_id, row in successful.items():
+            if isinstance(row.get("plan"), dict):
+                plans[seg_id] = row["plan"]
+
+        requested_ids = {
+            str(seg.id)
+            for seg in req.segments
+            if isinstance(seg.text, str) and seg.text.strip()
+        }
+        ready = len(requested_ids.intersection(successful))
+        total = len(requested_ids)
+        statuses = job.setdefault("translation_status", {})
+        if not isinstance(statuses, dict):
+            statuses = {}
+            job["translation_status"] = statuses
+        statuses[lang] = {
+            "ready": ready,
+            "total": total,
+            "failed": max(0, total - ready),
+            "complete": total > 0 and ready == total,
+        }
+        _save_job(job_id, job)
+    except Exception:  # noqa: BLE001 — persistence cannot sink a good translation
+        logger.warning("translation variant persistence skipped", exc_info=True)
+
+
+async def _finish_translation(translated, req, src_lang, loop, *, already_llm=False):
+    response = await _maybe_cinematic(
+        translated,
+        req,
+        src_lang,
+        loop,
+        already_llm=already_llm,
+    )
+    _persist_translation_variants(req, response)
+    return response
+
+
 def _guess_lang_from_text(segments) -> str | None:
     """Best-effort source language from segment text, by script.
 
@@ -357,7 +440,7 @@ async def dub_translate(req: TranslateRequest):
             # (previously this returned before _maybe_cinematic, so a Cinematic
             # pick on NLLB silently produced plain Fast output). Unloading NLLB
             # first is fine — the refine LLM is a separate network provider.
-            return await _maybe_cinematic(translated, req, src_lang, loop)
+            return await _finish_translation(translated, req, src_lang, loop)
 
         # LLM translation — resolves through the LLM Skills registry: per-skill
         # "Dub translation" override → global active provider (Settings → LLM
@@ -574,7 +657,7 @@ async def dub_translate(req: TranslateRequest):
             # rate-ratio badges and runs the bounded Autofit fit pass. Before
             # this it returned here, so Cinematic/Autofit on the LLM engine did
             # nothing.
-            return await _maybe_cinematic(translated, req, src_lang, loop, already_llm=True)
+            return await _finish_translation(translated, req, src_lang, loop, already_llm=True)
 
         # Offline Argos Translate
         if provider == "argos" or provider == "libretranslate":
@@ -637,7 +720,7 @@ async def dub_translate(req: TranslateRequest):
             # the headline fix: a user who picks Cinematic/Autofit on Argos now
             # gets the LLM refine + fit pass (and rate-ratio badges in Fast mode)
             # instead of silent plain-Fast output.
-            return await _maybe_cinematic(translated, req, src_lang, loop)
+            return await _finish_translation(translated, req, src_lang, loop)
 
         # Legacy / API Deep_Translator logic.
         # Preflight the optional `deep_translator` dep once so we fail with a
@@ -721,7 +804,7 @@ async def dub_translate(req: TranslateRequest):
         translated = await asyncio.gather(*tasks)
         translated.sort(key=lambda x: str(x["id"]))
 
-        return await _maybe_cinematic(
+        return await _finish_translation(
             translated, req, src_lang, loop,
         )
     except Exception as e:

@@ -21,6 +21,16 @@ The bundled TTS model package (`pyproject.toml`) is versioned independently.
 
 ### Changed
 
+- The Dub editor now uses one compact production command bar for project metadata, pipeline position, batch generation, and utility actions.
+- Gallery voice categories now live in one compact menu, with detailed voice filters tucked into an expandable toolbar.
+- Multi-language dubbing now prepares persistent per-language segment variants up front, shows translation readiness per flag, resumes incomplete batches, and reuses ready translations during generation.
+- The Voice workspace now keeps active and saved voices in a left rail, with generated takes using the full-height right rail.
+- The Voice Script editor now opens taller on desktop while staying compact on narrow windows.
+- Stories now opens as a full-height production workspace with a persistent project-and-cast rail, focused manuscript canvas, compact output controls, and a comprehensive working sample loaded by default.
+- The bundled VoiceStudio Demo Voice is now an original warm cinematic alto rendered by OmniVoice itself.
+- Audiobook now uses a wider, connected inspector with one-row essentials, focused tool panels, and live configuration counts.
+- Settings now keeps its category sidebar reachable in short windows, folds General into Appearance, uses compact, clearer controls throughout, adds a one-line family switcher and model-sized typography to Engines, compresses model storage and mirror controls, and gives Models compact one-line inventory rows plus space-efficient scrollable lists.
+- The capture shortcut now works system-wide through the desktop portal on Wayland, works on focused browser and Docker pages, and shows the correct platform keys.
 - PocketTTS now asks you to review its code license, model license and gated-access conditions before first use, and explains how to unlock the model instead of showing a raw download failure — thanks @paoloantinori! (#1442)
 - The repository moved to github.com/debpalash/VoiceStudio. Every link in the app, docs and scripts now points there; GitHub redirects the old URLs, and the Docker image paths, the app bundle identifier and your data folder are all deliberately unchanged. (#1394)
 - The app is now **VoiceStudio** (previously OmniVoice-Studio). Only the name you see changes — your data folder, settings and the Docker image paths stay put, so upgrading needs nothing from you. On Linux the .deb is now `voicestudio`; remove the old `omnivoice-studio` package once.

@@ -10,7 +10,7 @@ describe('SettingsSidebar — zero-match search empty state', () => {
     render(
       <SettingsSidebar
         visibleIds={new Set()}
-        active="general"
+        active="appearance"
         onSelect={() => {}}
         query="zzz-no-such-setting"
         onClearSearch={onClearSearch}
@@ -27,11 +27,18 @@ describe('SettingsSidebar — zero-match search empty state', () => {
   });
 
   it('renders the full grouped nav (and the narrow select) when nothing is filtered', () => {
-    render(<SettingsSidebar active="general" onSelect={() => {}} />);
+    render(<SettingsSidebar active="appearance" onSelect={() => {}} />);
     expect(screen.queryByTestId('settings-search-empty')).toBeNull();
     expect(screen.getByTestId('settings-nav-select')).toBeInTheDocument();
-    expect(screen.getByTestId('settings-nav-general')).toBeInTheDocument();
+    expect(screen.getByTestId('settings-nav-appearance')).toBeInTheDocument();
+    expect(screen.queryByTestId('settings-nav-general')).toBeNull();
     expect(screen.getByTestId('settings-nav-about')).toBeInTheDocument();
+  });
+
+  it('keeps the wide category rail independently scrollable', () => {
+    render(<SettingsSidebar active="appearance" onSelect={() => {}} />);
+    expect(screen.getByTestId('settings-nav-scroll')).toHaveClass('overflow-y-auto');
+    expect(screen.getByTestId('settings-nav-scroll')).toHaveClass('overscroll-contain');
   });
 
   it('renders only the matching categories when a filter set is provided', () => {

@@ -104,6 +104,7 @@ export default function DubLeftColumn({
   setMultiLangMode,
   multiLangs,
   setMultiLangs,
+  multiLangProgress,
   editSegments,
 }) {
   // Two-stage LLM translation quality — only meaningful (and only rendered)
@@ -232,6 +233,13 @@ export default function DubLeftColumn({
       /* advisory — rows keep their previous-language text, as before */
     }
   }
+
+  const translateActionLabel =
+    multiLangMode && multiLangs.length
+      ? `${t('dub.translate_all')} · ${t('dub.languages_selected', { count: multiLangs.length })}`
+      : hasAnyTranslation
+        ? t('dub.retranslate')
+        : t('dub.translate_all');
 
   return (
     <div className="studio-panel dub-panel-col">
@@ -447,11 +455,7 @@ export default function DubLeftColumn({
             loading={isTranslating}
             leading={!isTranslating && <Languages size={10} />}
           >
-            {isTranslating
-              ? t('dub.translating')
-              : hasAnyTranslation
-                ? t('dub.retranslate')
-                : t('dub.translate_all')}
+            {isTranslating ? t('dub.translating') : translateActionLabel}
           </Button>
           <Button
             variant="subtle"
@@ -757,7 +761,16 @@ export default function DubLeftColumn({
                 <MultiLangPicker
                   selected={multiLangs}
                   onChange={setMultiLangs}
-                  disabled={dubStep === 'generating'}
+                  activeCode={dubLangCode}
+                  progressByCode={multiLangProgress}
+                  onSelect={(code) => {
+                    const language = multiLangs.find((item) => item.code === code);
+                    if (!language) return;
+                    setDubLang(language.lang);
+                    setDubLangCode(code);
+                    hydrateMissingTranslations(code);
+                  }}
+                  disabled={dubStep === 'generating' || isTranslating}
                 />
               )}
             </div>
@@ -799,7 +812,7 @@ export default function DubLeftColumn({
               loading={isTranslating}
               leading={!isTranslating && <Languages size={10} />}
             >
-              {isTranslating ? t('dub.translating') : t('dub.translate_all')}
+              {isTranslating ? t('dub.translating') : translateActionLabel}
             </Button>
           </div>
         </div>

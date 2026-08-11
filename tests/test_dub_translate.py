@@ -545,3 +545,42 @@ async def test_openai_env_fallback_still_works(monkeypatch):
     resp = await dub_translate.dub_translate(req)
     assert resp["translated"][0]["text"] == "hola mundo"
     assert calls and calls[0]["model"] == "env-model"
+
+
+def test_translation_variants_persist_before_generation(monkeypatch):
+    """Translate Selected must survive a reload before any TTS track exists."""
+    from api.routers import dub_translate
+    from schemas.requests import TranslateRequest, TranslateSegment
+
+    job = {"segments_i18n": {"bn": {"s1": "ওহে"}}}
+    saved = []
+    monkeypatch.setattr(dub_translate, "_get_job", lambda job_id: job)
+    monkeypatch.setattr(dub_translate, "_save_job", lambda job_id, data: saved.append(job_id))
+    req = TranslateRequest(
+        job_id="job1",
+        target_lang="es",
+        segments=[
+            TranslateSegment(id="s1", text="hello"),
+            TranslateSegment(id="s2", text="world"),
+        ],
+    )
+
+    dub_translate._persist_translation_variants(
+        req,
+        {
+            "translated": [
+                {"id": "s1", "text": "hola", "plan": {"status": "fits"}},
+                {"id": "s2", "text": "", "error": "engine failed"},
+            ]
+        },
+    )
+
+    assert saved == ["job1"]
+    assert job["segments_i18n"] == {"bn": {"s1": "ওহে"}, "es": {"s1": "hola"}}
+    assert job["translation_plans"]["es"]["s1"] == {"status": "fits"}
+    assert job["translation_status"]["es"] == {
+        "ready": 1,
+        "total": 2,
+        "failed": 1,
+        "complete": False,
+    }

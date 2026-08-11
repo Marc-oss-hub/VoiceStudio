@@ -59,7 +59,10 @@ export default function SettingsSidebar({ visibleIds, active, onSelect, query, o
   }
 
   return (
-    <nav aria-label={t('settings.title', { defaultValue: 'Settings' })}>
+    <nav
+      aria-label={t('settings.title', { defaultValue: 'Settings' })}
+      className="min-[760px]:flex min-[760px]:min-h-0 min-[760px]:flex-1 min-[760px]:flex-col"
+    >
       {/* Narrow: dropdown navigator */}
       <div className="min-[760px]:hidden">
         <select
@@ -86,7 +89,10 @@ export default function SettingsSidebar({ visibleIds, active, onSelect, query, o
       </div>
 
       {/* Wide: vertical grouped rail */}
-      <div className="hidden flex-col gap-[var(--space-4)] min-[760px]:flex">
+      <div
+        data-testid="settings-nav-scroll"
+        className="settings-sidebar-scroll hidden min-h-0 flex-1 flex-col gap-[var(--space-4)] overflow-y-auto overscroll-contain pr-[var(--space-2)] min-[760px]:flex"
+      >
         {GROUPS.map((g) => {
           const items = g.items.filter((it) => isVisible(it.id));
           if (items.length === 0) return null;

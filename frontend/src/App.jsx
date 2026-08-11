@@ -283,7 +283,7 @@ function App() {
     mode === 'stories' ||
     mode === 'audiobook' ||
     // Voice (studio) and Dub workspaces moved their saved voices /
-    // projects + history into right-side panels; left sidebar dissolved.
+    // projects + history into workspace rails; global sidebar dissolved.
     mode === 'studio' ||
     mode === 'dub';
   const availableSidebarTabs = [];
@@ -1462,6 +1462,19 @@ function App() {
           <div
             className={`studio-with-history ${dubStep === 'idle' ? '' : 'studio-with-history--editing'}`}
           >
+            {dubStep === 'idle' && (
+              <div className="studio-projects">
+                <WorkspaceProjects
+                  projects={studioProjects}
+                  activeProjectId={activeProjectId}
+                  canSave={dubStep !== 'idle' || !!dubVideoFile}
+                  saveProject={saveProject}
+                  loadProject={loadProject}
+                  deleteProject={deleteProject}
+                  renameProject={renameProject}
+                />
+              </div>
+            )}
             <div className="studio-with-history__main">
               <ErrorBoundary name="dub">
                 <Suspense fallback={<LazyFallback />}>
@@ -1529,15 +1542,6 @@ function App() {
               editor (dubStep !== 'idle'). */}
             {dubStep === 'idle' && (
               <div className="studio-right">
-                <WorkspaceProjects
-                  projects={studioProjects}
-                  activeProjectId={activeProjectId}
-                  canSave={dubStep !== 'idle' || !!dubVideoFile}
-                  saveProject={saveProject}
-                  loadProject={loadProject}
-                  deleteProject={deleteProject}
-                  renameProject={renameProject}
-                />
                 <WorkspaceHistory
                   variant="dub"
                   dubHistory={dubHistory}
@@ -1550,6 +1554,24 @@ function App() {
           </div>
         ) : (
           <div className="studio-with-history">
+            <div className="studio-voices">
+              <WorkspaceVoices
+                defineMethod={defineMethod}
+                profiles={profiles}
+                selectedProfile={selectedProfile}
+                setSelectedProfile={setSelectedProfile}
+                previewLoading={previewLoading}
+                handleSelectProfile={handleSelectProfile}
+                handleDeleteProfile={handleDeleteProfile}
+                handlePreviewVoice={handlePreviewVoice}
+                handleUnlockProfile={handleUnlockProfile}
+                openVoiceProfile={openVoiceProfile}
+                onOpenVoicePreview={(profileId) => {
+                  setVoicePreviewProfileId(profileId || '');
+                  setIsVoicePreviewOpen(true);
+                }}
+              />
+            </div>
             <div className="studio-with-history__main">
               <ErrorBoundary name="clone-design">
                 <Suspense fallback={<LazyFallback />}>
@@ -1623,22 +1645,6 @@ function App() {
               </ErrorBoundary>
             </div>
             <div className="studio-right">
-              <WorkspaceVoices
-                defineMethod={defineMethod}
-                profiles={profiles}
-                selectedProfile={selectedProfile}
-                setSelectedProfile={setSelectedProfile}
-                previewLoading={previewLoading}
-                handleSelectProfile={handleSelectProfile}
-                handleDeleteProfile={handleDeleteProfile}
-                handlePreviewVoice={handlePreviewVoice}
-                handleUnlockProfile={handleUnlockProfile}
-                openVoiceProfile={openVoiceProfile}
-                onOpenVoicePreview={(profileId) => {
-                  setVoicePreviewProfileId(profileId || '');
-                  setIsVoicePreviewOpen(true);
-                }}
-              />
               <WorkspaceHistory
                 history={history}
                 handleSaveHistoryAsProfile={handleSaveHistoryAsProfile}

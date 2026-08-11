@@ -21,6 +21,27 @@ backend returns a single, actionable error telling you exactly what to install
 (the install command is single-sourced, so the button and the error never
 disagree).
 
+## Multi-language batch dubbing
+
+Turn on **Multi-lang**, select the target languages, then click **Translate
+All**. VoiceStudio translates every canonical timeline segment into a separate
+variant for each selected language. The flag chips show `ready/total` segment
+counts; click a chip to review and edit that language without overwriting the
+others.
+
+Translations are saved to the dub job before any audio is generated. If a
+batch is interrupted, **Translate All** resumes only incomplete languages; if
+every language is already complete, it intentionally re-translates all of them
+with the current engine and quality settings. **Generate N dubs** consumes
+ready variants directly and translates only missing or partial languages,
+then queues audio generation sequentially so local GPU/model access stays
+bounded.
+
+Every target is translated from the original transcript, never from another
+target language. A failed target remains reviewable/retryable and is skipped
+during generation rather than producing a source-language track under the
+wrong language label.
+
 ## Bring your own translation (Paste Translation)
 
 You don't have to use any of these engines. If you already translated the
