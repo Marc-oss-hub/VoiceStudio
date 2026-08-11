@@ -6,7 +6,7 @@ import { LANG_CODES } from '../utils/languages';
 import { useTranslation } from 'react-i18next';
 import LanguageFlag from './LanguageFlag';
 
-/** Chip-based multi-language selector for batch dubbing. */
+/** Compact multi-language selector for batch dubbing. */
 export default function MultiLangPicker({
   selected = [],
   onChange,
@@ -136,77 +136,32 @@ export default function MultiLangPicker({
 
   return (
     <div className="relative" ref={dropRef}>
-      <div className="flex items-start gap-[5px] min-h-[28px]">
-        {selected.length > 0 ? (
-          <div
-            className="grid min-w-0 flex-1 grid-cols-[repeat(auto-fit,minmax(112px,1fr))] gap-[4px]"
-            data-testid="multi-lang-selected-grid"
-          >
-            {selected.map((item) => {
-              const progress = progressByCode[item.code];
-              const complete = progress?.total > 0 && progress.ready === progress.total;
-              return (
-                <span
-                  key={item.code}
-                  className={`flex min-w-0 items-center gap-[3px] px-[4px] py-[3px] bg-[var(--chrome-hover-bg)] border border-solid rounded-[var(--chrome-radius-pill)] [font-family:var(--font-sans)] text-[0.68rem] font-medium text-[color:var(--chrome-fg)] ${activeCode === item.code ? 'border-[var(--color-brand)]' : 'border-transparent'}`}
-                  title={item.lang}
-                >
-                  <button
-                    type="button"
-                    data-testid={`multi-lang-select-${item.code}`}
-                    className="flex min-w-0 flex-1 items-center gap-[5px] border-0 bg-transparent p-0 text-inherit cursor-pointer disabled:cursor-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrome-accent)]"
-                    onClick={() => onSelect?.(item.code)}
-                    disabled={!onSelect}
-                    aria-pressed={activeCode === item.code}
-                  >
-                    <LanguageFlag code={item.code} />
-                    <span className="min-w-0 flex-1 truncate text-left">{item.lang}</span>
-                    <span className="[font-family:var(--font-mono)] text-[0.58rem] uppercase text-[color:var(--chrome-fg-dim)]">
-                      {item.code}
-                    </span>
-                    {progress?.total > 0 ? (
-                      <span
-                        data-testid={`multi-lang-progress-${item.code}`}
-                        className={`[font-family:var(--font-mono)] text-[0.55rem] tabular-nums ${complete ? 'text-[var(--color-success)]' : 'text-[var(--chrome-fg-muted)]'}`}
-                      >
-                        {progress.ready}/{progress.total}
-                      </span>
-                    ) : null}
-                  </button>
-                  {!disabled ? (
-                    <button
-                      type="button"
-                      className="bg-transparent border-0 text-[color:var(--chrome-fg-muted)] cursor-pointer p-0 flex shrink-0 items-center rounded-full [transition:color_0.15s] hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrome-accent)]"
-                      onClick={() => removeLang(item.code)}
-                      aria-label={t('common.remove', { term: item.lang })}
-                    >
-                      <X size={8} aria-hidden="true" />
-                    </button>
-                  ) : null}
-                </span>
-              );
-            })}
-          </div>
-        ) : null}
-        {!disabled ? (
-          <button
-            ref={triggerRef}
-            type="button"
-            className="flex shrink-0 items-center justify-center w-[24px] h-[24px] mt-[2px] rounded-full border border-dashed border-transparent bg-transparent text-[color:var(--chrome-fg-muted)] cursor-pointer [transition:background-color_0.15s,color_0.15s,border-color_0.15s] hover:bg-[var(--chrome-hover-bg)] hover:text-[color:var(--chrome-fg)] hover:border-solid focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrome-accent)]"
-            onClick={() => setDropOpen((open) => !open)}
-            title={t('dub.add_language')}
-            aria-label={t('dub.add_language')}
-            aria-haspopup="dialog"
-            aria-expanded={dropOpen}
-            aria-controls={dropOpen ? menuId : undefined}
-          >
-            <Plus size={10} aria-hidden="true" />
-          </button>
-        ) : null}
-      </div>
-
-      {selected.length > 0 ? (
-        <div className="[font-family:var(--font-mono)] text-[0.62rem] text-[color:var(--chrome-fg-dim)] mt-[4px]">
+      {!disabled ? (
+        <button
+          ref={triggerRef}
+          type="button"
+          className="flex w-full min-w-0 items-center gap-[7px] rounded-[4px] border border-solid border-transparent bg-[var(--chrome-hover-bg)] px-[8px] py-[5px] text-left text-[0.7rem] text-[color:var(--chrome-fg)] cursor-pointer hover:border-[var(--chrome-border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrome-accent)]"
+          onClick={() => setDropOpen((open) => !open)}
+          title={t('dub.add_language')}
+          aria-label={t('dub.add_language')}
+          aria-haspopup="dialog"
+          aria-expanded={dropOpen}
+          aria-controls={dropOpen ? menuId : undefined}
+        >
+          <Plus size={11} aria-hidden="true" />
+          <span className="min-w-0 flex-1 truncate">
+            {selected.length > 0
+              ? t('dub.languages_selected', { count: selected.length })
+              : t('dub.add_language')}
+          </span>
+          {activeCode ? (
+            <span className="[font-family:var(--font-mono)] text-[0.58rem] uppercase text-[color:var(--chrome-accent)]">
+              {activeCode}
+            </span>
+          ) : null}
+        </button>
+      ) : selected.length > 0 ? (
+        <div className="px-[8px] py-[5px] text-[0.7rem] text-[color:var(--chrome-fg-muted)]">
           {t('dub.languages_selected', { count: selected.length })}
         </div>
       ) : null}
@@ -248,6 +203,59 @@ export default function MultiLangPicker({
                 />
               </div>
               <div className="overflow-y-auto overscroll-contain flex-1 py-[4px]">
+                {selected.length > 0 ? (
+                  <>
+                    <div className="[font-family:var(--font-mono)] text-[0.62rem] font-semibold uppercase [letter-spacing:0.04em] text-[color:var(--chrome-fg-dim)] pt-[4px] px-[10px] pb-[2px]">
+                      {t('dub.languages_selected', { count: selected.length })}
+                    </div>
+                    <div
+                      className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-[2px] px-[4px] pb-[4px] border-b border-solid border-b-[var(--chrome-border)]"
+                      data-testid="multi-lang-selected-grid"
+                    >
+                      {selected.map((item) => {
+                        const progress = progressByCode[item.code];
+                        const complete = progress?.total > 0 && progress.ready === progress.total;
+                        return (
+                          <span
+                            key={item.code}
+                            className={`flex min-w-0 items-center gap-[4px] rounded-[4px] px-[7px] py-[5px] text-[0.72rem] ${activeCode === item.code ? 'bg-[color-mix(in_srgb,var(--color-brand)_12%,transparent)] text-[var(--chrome-fg)]' : 'text-[var(--chrome-fg-muted)]'}`}
+                          >
+                            <button
+                              type="button"
+                              data-testid={`multi-lang-select-${item.code}`}
+                              className="flex min-w-0 flex-1 items-center gap-[6px] border-0 bg-transparent p-0 text-inherit cursor-pointer disabled:cursor-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrome-accent)]"
+                              onClick={() => onSelect?.(item.code)}
+                              disabled={!onSelect}
+                              aria-pressed={activeCode === item.code}
+                            >
+                              <LanguageFlag code={item.code} />
+                              <span className="min-w-0 flex-1 truncate text-left">{item.lang}</span>
+                              <span className="[font-family:var(--font-mono)] text-[0.58rem] uppercase text-[color:var(--chrome-fg-dim)]">
+                                {item.code}
+                              </span>
+                              {progress?.total > 0 ? (
+                                <span
+                                  data-testid={`multi-lang-progress-${item.code}`}
+                                  className={`[font-family:var(--font-mono)] text-[0.55rem] tabular-nums ${complete ? 'text-[var(--color-success)]' : 'text-[var(--chrome-fg-muted)]'}`}
+                                >
+                                  {progress.ready}/{progress.total}
+                                </span>
+                              ) : null}
+                            </button>
+                            <button
+                              type="button"
+                              className="flex shrink-0 items-center rounded-full border-0 bg-transparent p-0 text-[color:var(--chrome-fg-muted)] cursor-pointer hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrome-accent)]"
+                              onClick={() => removeLang(item.code)}
+                              aria-label={t('common.remove', { term: item.lang })}
+                            >
+                              <X size={9} aria-hidden="true" />
+                            </button>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </>
+                ) : null}
                 {popularFiltered.length > 0 ? (
                   <>
                     <div className="[font-family:var(--font-mono)] text-[0.62rem] font-semibold uppercase [letter-spacing:0.04em] text-[color:var(--chrome-fg-dim)] pt-[6px] px-[10px] pb-[2px]">

@@ -241,59 +241,46 @@ export default function DubLeftColumn({
         ? t('dub.retranslate')
         : t('dub.translate_all');
 
+  const selectPreviewTrack = (code) => {
+    setPreviewMode(code);
+    if (code === 'original') return;
+    const label =
+      LANG_CODES.find((language) => language.code === code)?.label || code.toUpperCase();
+    const state = useAppStore.getState();
+    state.setDubLang(label);
+    state.switchDubLangCode(code);
+    hydrateMissingTranslations(code);
+  };
+
   return (
     <div className="studio-panel dub-panel-col">
       {hasDubbedTrack && (
-        <div
-          className="dub-lang-switch"
-          role="radiogroup"
-          aria-label={t('dub.preview_language', { defaultValue: 'Preview language' })}
-        >
-          <button
-            type="button"
-            role="radio"
-            aria-checked={previewMode === 'original'}
-            className={`dub-lang-pill ${previewMode === 'original' ? 'is-active' : ''}`}
-            onClick={() => setPreviewMode('original')}
+        <div className="mb-[5px] flex items-center gap-[7px] rounded-[6px] border border-solid border-[var(--chrome-border)] bg-[var(--chrome-bg)] px-[8px] py-[5px]">
+          <label
+            htmlFor="dub-preview-track"
+            className="shrink-0 [font-family:var(--chrome-font-mono)] text-[0.6rem] font-semibold uppercase tracking-[var(--chrome-label-track)] text-[var(--chrome-fg-muted)]"
           >
-            {t('dub.original_audio')}
-          </button>
-          {dubTracks.map((code) => {
-            const label = LANG_CODES.find((lc) => lc.code === code)?.label || code.toUpperCase();
-            return (
-              <button
-                key={code}
-                type="button"
-                role="radio"
-                aria-checked={previewMode === code}
-                className={`dub-lang-pill ${previewMode === code ? 'is-active' : ''}`}
-                onClick={() => {
-                  setPreviewMode(code);
-                  // The transcript/segment list follows the previewed track:
-                  // swap segment texts to this language's saved translations
-                  // (the P1.2 per-language store — non-destructive, exactly
-                  // what the language dropdown and multi-language generate
-                  // already do). Without this, previewing German played
-                  // German audio over, say, Bengali segment text.
-                  const st = useAppStore.getState();
-                  st.setDubLang(label);
-                  st.switchDubLangCode(code);
-                  // Review finding (#1148): the in-browser translations map
-                  // can be PARTIAL (tracks generated before per-language
-                  // persistence, partial regens) — the non-destructive switch
-                  // then leaves those rows in the previous language, a
-                  // mixed-language transcript under a single-language track.
-                  // Hydrate the gaps from the backend's authoritative
-                  // segments_i18n store. Failure-silent: no data → the rows
-                  // keep what they had, exactly the pre-hydration behavior.
-                  hydrateMissingTranslations(code);
-                }}
-                title={trackTooltip(code)}
-              >
-                {label}
-              </button>
-            );
-          })}
+            {t('dub.preview_language', { defaultValue: 'Preview language' })}
+          </label>
+          <select
+            id="dub-preview-track"
+            className="input-base !min-w-0 !flex-1 !py-[3px] !text-[0.68rem]"
+            value={previewMode}
+            onChange={(event) => selectPreviewTrack(event.target.value)}
+          >
+            <option value="original">{t('dub.original_audio')}</option>
+            {dubTracks.map((code) => {
+              const label = LANG_CODES.find((language) => language.code === code)?.label;
+              return (
+                <option key={code} value={code} title={trackTooltip(code)}>
+                  {label || code.toUpperCase()} · {code.toUpperCase()}
+                </option>
+              );
+            })}
+          </select>
+          <span className="shrink-0 [font-family:var(--font-mono)] text-[0.58rem] text-[var(--chrome-fg-dim)]">
+            {dubTracks.length}
+          </span>
         </div>
       )}
       <WaveformTimeline

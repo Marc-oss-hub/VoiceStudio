@@ -745,7 +745,7 @@ export default function DubTab(props) {
             pipelineSteps={pipelineSteps}
             onPipelineStep={onPipelineStep}
           />
-          <div className="grid grid-cols-2 max-[1000px]:grid-cols-1 max-[1000px]:grid-rows-[auto_1fr] gap-[6px] flex-1 min-h-0 overflow-hidden">
+          <div className="grid grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] max-[1000px]:grid-cols-1 max-[1000px]:grid-rows-[auto_1fr] gap-[6px] flex-1 min-h-0 overflow-hidden">
             <DubLeftColumn
               hasDubbedTrack={hasDubbedTrack}
               t={t}
@@ -871,10 +871,9 @@ export default function DubTab(props) {
             dubError={dubError}
             dubFailure={dubFailure}
             onDismissError={() => setDubError('')}
-            exportTracks={exportTracks}
-            setExportTracks={setExportTracks}
             dubSegments={dubSegments}
             translateQuality={translateQuality}
+            onExport={() => setExportOpen(true)}
           />
         </div>
       )}

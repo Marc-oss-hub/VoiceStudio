@@ -26,6 +26,7 @@ the frozen-backend fallback mirror it for their toolchains.
 ### Changed
 
 - The Dub editor now uses one compact production command bar for project metadata, pipeline position, batch generation, and utility actions.
+- Dubbing now keeps preview, batch-language, and export track lists in compact selectors instead of repeating every language across the workspace.
 - Gallery voice categories now live in one compact menu, with detailed voice filters tucked into an expandable toolbar.
 - Multi-language dubbing now prepares persistent per-language segment variants up front, shows translation readiness per flag, resumes incomplete batches, and reuses ready translations during generation.
 - The Voice workspace now keeps active and saved voices in a left rail, with generated takes using the full-height right rail.

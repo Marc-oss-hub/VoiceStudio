@@ -4438,39 +4438,6 @@ button.dub-stepper__action:focus-visible {
 .dub-cast--muted .dub-cast__label,
 .dub-cast--muted .dub-cast__kicker { color: var(--chrome-fg-dim); }
 
-/* ── Multi-language preview switcher ──────────────────────────────────── */
-.dub-lang-switch {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 0 8px;
-}
-.dub-lang-pill {
-  padding: 5px 14px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--chrome-fg-muted);
-  background: var(--chrome-hover-bg, rgba(255, 255, 255, 0.05));
-  border: 1px solid var(--chrome-border);
-  border-radius: var(--chrome-radius-pill, 999px);
-  cursor: pointer;
-  transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
-}
-.dub-lang-pill:hover {
-  color: var(--chrome-fg);
-  border-color: var(--chrome-border-strong);
-}
-.dub-lang-pill.is-active {
-  color: #1b1b1b;
-  background: var(--chrome-fg, #ebdbb2);
-  border-color: var(--chrome-fg, #ebdbb2);
-}
-.dub-lang-pill:focus-visible {
-  outline: 2px solid var(--chrome-accent);
-  outline-offset: 1px;
-}
-
 /* ── Skeleton segment rows (shimmer bars) ─────────────────────────────── */
 .dub-skel-table       { flex: 1; max-height: none; overflow-y: auto; min-height: 0; }
 .dub-skel-row         { gap: 6px; }

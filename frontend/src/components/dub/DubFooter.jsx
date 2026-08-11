@@ -1,20 +1,12 @@
 import { useEffect } from 'react';
-import { Check, AlertCircle, X } from 'lucide-react';
-import { Badge } from '../../ui';
+import { Check, AlertCircle, Download, X } from 'lucide-react';
+import { Badge, Button } from '../../ui';
 import DubFailureNotice from './DubFailureNotice';
 
 // How long a translate/pipeline error banner lingers before it self-clears.
 // Long enough to read a short message; the × and corrective-action clears are
 // the primary escape hatches — this is the belt-and-suspenders timeout.
 const ERROR_AUTOCLEAR_MS = 12000;
-
-// Export-track toggle chips: flat pill outline, tinted by on/off/success state.
-const TRACK_LABEL =
-  'inline-flex items-center gap-[4px] px-[8px] py-[2px] border border-transparent rounded-[var(--chrome-radius-pill)] cursor-pointer transition-colors';
-const TRACK_ON = 'text-[var(--chrome-fg)] border-transparent bg-[var(--chrome-hover-bg)]';
-const TRACK_OFF = 'text-[var(--chrome-fg-dim)]';
-const TRACK_ON_SUCCESS =
-  'text-[var(--chrome-severity-ok)] border-transparent bg-[color-mix(in_srgb,var(--chrome-severity-ok)_10%,transparent)]';
 
 export default function DubFooter({
   t,
@@ -24,10 +16,9 @@ export default function DubFooter({
   dubError,
   dubFailure,
   onDismissError,
-  exportTracks,
-  setExportTracks,
   dubSegments,
   translateQuality,
+  onExport,
 }) {
   // Auto-clear the error banner after a grace period so it can't get stuck
   // forever (issue: "TRANSLATION FAILED banner never goes away"). Skipped
@@ -43,23 +34,41 @@ export default function DubFooter({
 
   return (
     <div className="px-[var(--space-3)] py-[4px] shrink-0 bg-[var(--chrome-bg)] border border-transparent">
-      {dubStep === 'done' && (
-        <div className="mb-[var(--space-2)]">
-          <Badge tone="success">
-            <Check size={11} /> {t('dub.tracks_done', { tracks: dubTracks.join(', ') })}
-          </Badge>
-          {incrementalPlan && incrementalPlan.stale?.length > 0 && (
-            <Badge tone="warn" className="ml-[6px]">
-              {t('dub.segments_changed', { count: incrementalPlan.stale.length })}
-            </Badge>
-          )}
-          {incrementalPlan &&
-            incrementalPlan.stale?.length === 0 &&
-            incrementalPlan.fresh?.length > 0 && (
-              <Badge tone="neutral" className="ml-[6px]">
-                {t('dub.all_up_to_date', { count: incrementalPlan.fresh.length })}
+      {dubTracks.length > 0 && (
+        <div className="mb-[var(--space-2)] flex items-center gap-[8px] rounded-[6px] border border-solid border-[var(--chrome-border)] bg-[var(--chrome-panel-bg)] px-[10px] py-[6px]">
+          <div className="flex min-w-0 flex-1 items-center gap-[6px] overflow-hidden text-[0.7rem] text-[var(--chrome-fg-muted)]">
+            {dubStep === 'done' ? (
+              <span className="inline-flex shrink-0 items-center gap-[4px] text-[var(--color-success)]">
+                <Check size={12} />
+              </span>
+            ) : null}
+            <span className="truncate">
+              {t('dub.languages_selected', { count: dubTracks.length })}
+            </span>
+            {incrementalPlan && incrementalPlan.stale?.length > 0 && (
+              <Badge tone="warn">
+                {t('dub.segments_changed', { count: incrementalPlan.stale.length })}
               </Badge>
             )}
+            {incrementalPlan &&
+              incrementalPlan.stale?.length === 0 &&
+              incrementalPlan.fresh?.length > 0 && (
+                <span className="hidden truncate text-[0.65rem] text-[var(--chrome-fg-dim)] sm:inline">
+                  {t('dub.all_up_to_date', { count: incrementalPlan.fresh.length })}
+                </span>
+              )}
+          </div>
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            className="shrink-0"
+            onClick={onExport}
+            aria-label={t('dub.export_btn')}
+          >
+            <Download size={11} />
+            {t('dub.export_btn')}
+          </Button>
         </div>
       )}
       {dubError && (
@@ -81,39 +90,6 @@ export default function DubFooter({
             )}
           </span>
           <DubFailureNotice failure={dubFailure} />
-        </div>
-      )}
-      {/* Output options + Timing moved to the top of the right (transcript) section. */}
-      {dubTracks.length > 0 && (
-        <div className="flex items-center gap-[var(--space-2)] mb-[2px] px-[var(--space-3)] py-[3px] text-[length:var(--text-xs)] text-[var(--chrome-fg-muted)] font-[family-name:var(--font-sans)] bg-[var(--chrome-bg)] rounded-[var(--chrome-radius-pill)] border border-transparent flex-wrap">
-          <span className="font-[family-name:var(--chrome-font-mono)] text-[length:var(--chrome-label-size)] tracking-[var(--chrome-label-track)] uppercase text-[var(--chrome-fg-muted)] font-semibold">
-            {t('dub.export_tracks')}
-          </span>
-          <label
-            className={`${TRACK_LABEL} ${exportTracks['original'] !== false ? TRACK_ON : TRACK_OFF}`}
-          >
-            <input
-              type="checkbox"
-              className="accent-[var(--color-brand)]"
-              checked={exportTracks['original'] !== false}
-              onChange={(e) => setExportTracks((prev) => ({ ...prev, original: e.target.checked }))}
-            />
-            <span>{t('dub.original_track')}</span>
-          </label>
-          {dubTracks.map((t) => (
-            <label
-              key={t}
-              className={`${TRACK_LABEL} ${exportTracks[t] !== false ? TRACK_ON_SUCCESS : TRACK_OFF}`}
-            >
-              <input
-                type="checkbox"
-                className="accent-[var(--color-brand)]"
-                checked={exportTracks[t] !== false}
-                onChange={(e) => setExportTracks((prev) => ({ ...prev, [t]: e.target.checked }))}
-              />
-              <span className="uppercase tracking-[0.04em]">{t}</span>
-            </label>
-          ))}
         </div>
       )}
       {(() => {

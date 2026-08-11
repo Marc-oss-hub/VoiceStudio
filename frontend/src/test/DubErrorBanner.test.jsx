@@ -20,6 +20,7 @@ function makeProps(over = {}) {
     setExportTracks: vi.fn(),
     dubSegments: [],
     translateQuality: 'fast',
+    onExport: vi.fn(),
     ...over,
   };
 }
@@ -64,5 +65,25 @@ describe('DubFooter — dismissable / auto-clearing translation error banner', (
   it('no banner, no dismiss button when there is no error', () => {
     render(<DubFooter {...makeProps({ dubError: '' })} />);
     expect(screen.queryByRole('button', { name: t('dub.dismiss_error') })).not.toBeInTheDocument();
+  });
+
+  it('summarises finished tracks instead of rendering a checkbox wall', () => {
+    const onExport = vi.fn();
+    render(
+      <DubFooter
+        {...makeProps({
+          dubStep: 'done',
+          dubError: '',
+          dubTracks: ['es', 'fr', 'de'],
+          incrementalPlan: { stale: [], fresh: [{}, {}] },
+          onExport,
+        })}
+      />,
+    );
+
+    expect(screen.getByText(t('dub.languages_selected', { count: 3 }))).toBeInTheDocument();
+    expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
+    fireEvent.click(screen.getByRole('button', { name: t('dub.export_btn') }));
+    expect(onExport).toHaveBeenCalledTimes(1);
   });
 });

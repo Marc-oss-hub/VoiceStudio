@@ -1,7 +1,7 @@
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import '../i18n';
+import i18n from '../i18n';
 import MultiLangPicker from './MultiLangPicker';
 import { LANGUAGE_FLAGS } from './LanguageFlag';
 import { LANG_CODES } from '../utils/languages';
@@ -66,7 +66,7 @@ describe('MultiLangPicker', () => {
     expect(trigger).toHaveFocus();
   });
 
-  it('lays selected languages out in a responsive flag grid', () => {
+  it('keeps selected languages behind one compact summary control', () => {
     render(
       <MultiLangPicker
         selected={[
@@ -78,8 +78,12 @@ describe('MultiLangPicker', () => {
       />,
     );
 
+    expect(screen.queryByTestId('multi-lang-selected-grid')).not.toBeInTheDocument();
+    const summary = screen.getByRole('button', { name: 'Add language' });
+    expect(summary).toHaveTextContent(i18n.t('dub.languages_selected', { count: 3 }));
+
+    fireEvent.click(summary);
     const grid = screen.getByTestId('multi-lang-selected-grid');
-    expect(grid.className).toContain('grid-cols-[repeat(auto-fit,minmax(112px,1fr))]');
     expect(within(grid).getByTestId('language-flag-en')).toBeInTheDocument();
     expect(within(grid).getByTestId('language-flag-es')).toBeInTheDocument();
     expect(within(grid).getByTestId('language-flag-ja')).toBeInTheDocument();
@@ -100,6 +104,7 @@ describe('MultiLangPicker', () => {
       />,
     );
 
+    fireEvent.click(screen.getByRole('button', { name: 'Add language' }));
     expect(screen.getByTestId('multi-lang-progress-es')).toHaveTextContent('3/3');
     expect(screen.getByTestId('multi-lang-progress-ja')).toHaveTextContent('1/3');
     fireEvent.click(screen.getByTestId('multi-lang-select-ja'));
