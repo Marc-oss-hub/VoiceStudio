@@ -163,7 +163,7 @@ export default function DubFooter({
             <>
               <FooterBtn
                 sm
-                tone={dubSegments.length && !isTranslating ? 'pink' : 'idle'}
+                tone={dubStep === 'done' || !dubSegments.length || isTranslating ? 'idle' : 'pink'}
                 className="!flex-none"
                 onClick={onGenerateClick}
                 disabled={!dubSegments.length || isTranslating}
@@ -195,20 +195,27 @@ export default function DubFooter({
               icon={
                 qcRunning ? <Loader className="spinner" size={11} /> : <ShieldCheck size={11} />
               }
-              label={t('dub.qc_btn', { defaultValue: 'Verify dub timing (second-pass check)' })}
+              label={t('dub.verify', { defaultValue: 'Verify' })}
+              aria-label={t('dub.qc_btn', {
+                defaultValue: 'Verify dub timing (second-pass check)',
+              })}
+              title={t('dub.qc_btn', { defaultValue: 'Verify dub timing (second-pass check)' })}
             />
           ) : null}
-          <Button
-            type="button"
-            variant="primary"
-            size="sm"
-            disabled={dubStep !== 'done' && !dubSegments.length}
-            onClick={onExport}
-            aria-label={t('dub.export_btn')}
-          >
-            <Download size={11} />
-            {t('dub.export_btn')}
-          </Button>
+          <div className="ml-[2px] border-l border-[var(--chrome-border)] pl-[7px]">
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              className="!h-[28px] !rounded-[var(--chrome-radius-pill)] !px-[9px] !font-[family-name:var(--chrome-font-mono)] !text-[0.62rem] !font-semibold !tracking-[0.04em]"
+              disabled={dubStep !== 'done' && !dubSegments.length}
+              onClick={onExport}
+              aria-label={t('dub.export_btn')}
+            >
+              <Download size={11} />
+              {t('dub.export_btn')}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

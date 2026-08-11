@@ -120,7 +120,9 @@ describe('DubFooter — dismissable / auto-clearing translation error banner', (
     expect(within(row).getByText(t('dub.tracks_ready', { count: 1 }))).toBeInTheDocument();
     expect(within(row).getByText(t('dub.all_up_to_date', { count: 14 }))).toBeInTheDocument();
     fireEvent.click(within(row).getByRole('button', { name: t('dub.generate_dub') }));
-    fireEvent.click(within(row).getByRole('button', { name: t('dub.qc_btn') }));
+    const verify = within(row).getByRole('button', { name: t('dub.qc_btn') });
+    expect(verify).toHaveTextContent(t('dub.verify'));
+    fireEvent.click(verify);
     fireEvent.click(within(row).getByRole('button', { name: t('dub.export_btn') }));
     expect(onGenerateClick).toHaveBeenCalledOnce();
     expect(handleDubQc).toHaveBeenCalledOnce();
