@@ -52,30 +52,6 @@ export default function DubFooter({
 
   return (
     <div className="px-[var(--space-3)] py-[4px] shrink-0 bg-[var(--chrome-bg)] border border-transparent">
-      {dubTracks.length > 0 && (
-        <div className="mb-[var(--space-2)] flex items-center gap-[8px] rounded-[6px] border border-solid border-[var(--chrome-border)] bg-[var(--chrome-panel-bg)] px-[10px] py-[6px]">
-          <div className="flex min-w-0 flex-1 items-center gap-[6px] overflow-hidden text-[0.7rem] text-[var(--chrome-fg-muted)]">
-            {dubStep === 'done' ? (
-              <span className="inline-flex shrink-0 items-center gap-[4px] text-[var(--color-success)]">
-                <Check size={12} />
-              </span>
-            ) : null}
-            <span className="truncate">{t('dub.tracks_ready', { count: dubTracks.length })}</span>
-            {incrementalPlan && incrementalPlan.stale?.length > 0 && (
-              <Badge tone="warn">
-                {t('dub.segments_changed', { count: incrementalPlan.stale.length })}
-              </Badge>
-            )}
-            {incrementalPlan &&
-              incrementalPlan.stale?.length === 0 &&
-              incrementalPlan.fresh?.length > 0 && (
-                <span className="hidden truncate text-[0.65rem] text-[var(--chrome-fg-dim)] sm:inline">
-                  {t('dub.all_up_to_date', { count: incrementalPlan.fresh.length })}
-                </span>
-              )}
-          </div>
-        </div>
-      )}
       {dubError && (
         <div className="mb-[var(--space-2)]">
           <span className="inline-flex items-center gap-[4px]">
@@ -133,76 +109,107 @@ export default function DubFooter({
           </div>
         );
       })()}
-      <div className="mt-[var(--space-2)] flex flex-wrap items-center justify-end gap-[6px] border-t border-solid border-[var(--chrome-border)] pt-[var(--space-2)]">
-        {dubStep === 'stopping' ? (
-          <FooterBtn
-            sm
-            tone="stopping"
-            disabled
-            className="!flex-none"
-            icon={<Loader className="spinner" size={10} />}
-            label={t('dub.stopping')}
-          />
-        ) : dubStep === 'generating' ? (
-          <FooterBtn
-            sm
-            tone="danger"
-            className="!flex-none"
-            onClick={onStop}
-            icon={<Square size={9} />}
-            label={t('dub.stop_progress', {
-              current: dubProgress.current,
-              total: dubProgress.total,
-            })}
-          />
-        ) : (
-          <>
-            <FooterBtn
-              sm
-              tone={dubSegments.length && !isTranslating ? 'pink' : 'idle'}
-              className="!flex-none"
-              onClick={onGenerateClick}
-              disabled={!dubSegments.length || isTranslating}
-              icon={<Play size={11} />}
-              label={generateLabel}
-              aria-label={generateLabel}
-            />
-            {dubStep === 'done' && incrementalPlan?.stale?.length > 0 ? (
-              <FooterBtn
-                sm
-                tone="pink"
-                className="!flex-none"
-                onClick={() =>
-                  handleDubGenerate({ regenOnly: incrementalPlan.stale, preview: true })
-                }
-                icon={<Play size={11} />}
-                label={t('dub.regen_changed', { count: incrementalPlan.stale.length })}
+      <div
+        className="mt-[var(--space-2)] flex flex-wrap items-center gap-[8px] rounded-[6px] border border-solid border-[var(--chrome-border)] bg-[var(--chrome-panel-bg)] px-[10px] py-[6px]"
+        data-testid="dub-workflow-actions"
+      >
+        {dubTracks.length > 0 ? (
+          <div className="flex min-w-0 flex-1 items-center gap-[6px] overflow-hidden text-[0.7rem] text-[var(--chrome-fg-muted)]">
+            {dubStep === 'done' ? (
+              <Check
+                className="shrink-0 text-[var(--color-success)]"
+                size={12}
+                aria-hidden="true"
               />
             ) : null}
-          </>
+            <span className="truncate">{t('dub.tracks_ready', { count: dubTracks.length })}</span>
+            {incrementalPlan?.stale?.length > 0 ? (
+              <Badge tone="warn">
+                {t('dub.segments_changed', { count: incrementalPlan.stale.length })}
+              </Badge>
+            ) : null}
+            {incrementalPlan?.stale?.length === 0 && incrementalPlan.fresh?.length > 0 ? (
+              <span className="truncate text-[0.65rem] text-[var(--chrome-fg-dim)] max-[760px]:hidden">
+                {t('dub.all_up_to_date', { count: incrementalPlan.fresh.length })}
+              </span>
+            ) : null}
+          </div>
+        ) : (
+          <div className="flex-1" />
         )}
-        {dubStep === 'done' ? (
-          <FooterBtn
-            sm
-            tone="idle"
-            className="!flex-none"
-            disabled={qcRunning || !dubSegments.length}
-            onClick={handleDubQc}
-            icon={qcRunning ? <Loader className="spinner" size={11} /> : <ShieldCheck size={11} />}
-            label={t('dub.qc_btn', { defaultValue: 'Verify dub timing (second-pass check)' })}
-          />
-        ) : null}
-        <Button
-          type="button"
-          variant="primary"
-          size="sm"
-          disabled={dubStep !== 'done' && !dubSegments.length}
-          onClick={onExport}
-          aria-label={t('dub.export_btn')}
-        >
-          <Download size={11} />
-          {t('dub.export_btn')}
-        </Button>
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-[6px]">
+          {dubStep === 'stopping' ? (
+            <FooterBtn
+              sm
+              tone="stopping"
+              disabled
+              className="!flex-none"
+              icon={<Loader className="spinner" size={10} />}
+              label={t('dub.stopping')}
+            />
+          ) : dubStep === 'generating' ? (
+            <FooterBtn
+              sm
+              tone="danger"
+              className="!flex-none"
+              onClick={onStop}
+              icon={<Square size={9} />}
+              label={t('dub.stop_progress', {
+                current: dubProgress.current,
+                total: dubProgress.total,
+              })}
+            />
+          ) : (
+            <>
+              <FooterBtn
+                sm
+                tone={dubSegments.length && !isTranslating ? 'pink' : 'idle'}
+                className="!flex-none"
+                onClick={onGenerateClick}
+                disabled={!dubSegments.length || isTranslating}
+                icon={<Play size={11} />}
+                label={generateLabel}
+                aria-label={generateLabel}
+              />
+              {dubStep === 'done' && incrementalPlan?.stale?.length > 0 ? (
+                <FooterBtn
+                  sm
+                  tone="pink"
+                  className="!flex-none"
+                  onClick={() =>
+                    handleDubGenerate({ regenOnly: incrementalPlan.stale, preview: true })
+                  }
+                  icon={<Play size={11} />}
+                  label={t('dub.regen_changed', { count: incrementalPlan.stale.length })}
+                />
+              ) : null}
+            </>
+          )}
+          {dubStep === 'done' ? (
+            <FooterBtn
+              sm
+              tone="idle"
+              className="!flex-none"
+              disabled={qcRunning || !dubSegments.length}
+              onClick={handleDubQc}
+              icon={
+                qcRunning ? <Loader className="spinner" size={11} /> : <ShieldCheck size={11} />
+              }
+              label={t('dub.qc_btn', { defaultValue: 'Verify dub timing (second-pass check)' })}
+            />
+          ) : null}
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            disabled={dubStep !== 'done' && !dubSegments.length}
+            onClick={onExport}
+            aria-label={t('dub.export_btn')}
+          >
+            <Download size={11} />
+            {t('dub.export_btn')}
+          </Button>
+        </div>
       </div>
     </div>
   );

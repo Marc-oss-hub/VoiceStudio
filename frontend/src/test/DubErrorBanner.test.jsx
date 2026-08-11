@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { fireEvent, render, screen, act } from '@testing-library/react';
+import { fireEvent, render, screen, act, within } from '@testing-library/react';
 import i18n from '../i18n';
 
 import DubFooter from '../components/dub/DubFooter';
@@ -90,7 +90,8 @@ describe('DubFooter — dismissable / auto-clearing translation error banner', (
       />,
     );
 
-    expect(screen.getByText(t('dub.tracks_ready', { count: 3 }))).toBeInTheDocument();
+    const row = screen.getByTestId('dub-workflow-actions');
+    expect(within(row).getByText(t('dub.tracks_ready', { count: 3 }))).toBeInTheDocument();
     expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
     fireEvent.click(screen.getByRole('button', { name: t('dub.export_btn') }));
     expect(onExport).toHaveBeenCalledTimes(1);
@@ -107,6 +108,7 @@ describe('DubFooter — dismissable / auto-clearing translation error banner', (
           dubError: '',
           dubTracks: ['es'],
           dubSegments: [{ id: '1' }],
+          incrementalPlan: { stale: [], fresh: Array.from({ length: 14 }) },
           onGenerateClick,
           handleDubQc,
           onExport,
@@ -114,9 +116,12 @@ describe('DubFooter — dismissable / auto-clearing translation error banner', (
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: t('dub.generate_dub') }));
-    fireEvent.click(screen.getByRole('button', { name: t('dub.qc_btn') }));
-    fireEvent.click(screen.getByRole('button', { name: t('dub.export_btn') }));
+    const row = screen.getByTestId('dub-workflow-actions');
+    expect(within(row).getByText(t('dub.tracks_ready', { count: 1 }))).toBeInTheDocument();
+    expect(within(row).getByText(t('dub.all_up_to_date', { count: 14 }))).toBeInTheDocument();
+    fireEvent.click(within(row).getByRole('button', { name: t('dub.generate_dub') }));
+    fireEvent.click(within(row).getByRole('button', { name: t('dub.qc_btn') }));
+    fireEvent.click(within(row).getByRole('button', { name: t('dub.export_btn') }));
     expect(onGenerateClick).toHaveBeenCalledOnce();
     expect(handleDubQc).toHaveBeenCalledOnce();
     expect(onExport).toHaveBeenCalledOnce();
