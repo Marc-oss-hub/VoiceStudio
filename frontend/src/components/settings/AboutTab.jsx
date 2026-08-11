@@ -20,6 +20,7 @@ import { SettingsSection } from './primitives';
 import { CATEGORY_BY_ID } from './settingsCategories';
 import { useAppStore } from '../../store';
 import { isTauri } from './native';
+import VoiceStudioMark from '../brand/VoiceStudioMark';
 
 /**
  * Where a failing self-check can be fixed inside the app — diagnose check id
@@ -87,7 +88,7 @@ export default function AboutTab({
       <div className="overflow-hidden rounded-[calc(var(--chrome-radius-pill)*1.4)] bg-[color-mix(in_srgb,var(--chrome-accent)_7%,var(--chrome-bg))] p-[var(--space-5)]">
         <div className="flex flex-wrap items-center gap-[var(--space-4)]">
           <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--chrome-radius-pill)] bg-[color-mix(in_srgb,var(--chrome-accent)_16%,var(--chrome-bg))] text-[var(--chrome-accent)] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--chrome-accent)_22%,transparent)]">
-            <Info size={22} aria-hidden="true" />
+            <VoiceStudioMark className="size-7" />
           </span>
           <div className="min-w-0 flex-1">
             <h3 className="m-0 text-[length:var(--text-lg)] font-semibold tracking-[-0.02em] text-[var(--chrome-fg)]">

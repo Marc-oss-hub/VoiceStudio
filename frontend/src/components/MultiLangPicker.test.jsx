@@ -1,43 +1,69 @@
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-
+import '../i18n';
 import MultiLangPicker from './MultiLangPicker';
 import { LANGUAGE_FLAGS } from './LanguageFlag';
 import { LANG_CODES } from '../utils/languages';
 
-afterEach(() => {
-  vi.restoreAllMocks();
+const rect = (overrides = {}) => ({
+  x: 40,
+  y: 720,
+  top: 720,
+  right: 64,
+  bottom: 744,
+  left: 40,
+  width: 24,
+  height: 24,
+  toJSON: () => {},
+  ...overrides,
 });
 
-describe('MultiLangPicker dropdown positioning', () => {
+afterEach(() => vi.restoreAllMocks());
+
+describe('MultiLangPicker', () => {
   it('keeps a representative vector flag mapped for every supported language', () => {
     expect(LANG_CODES.filter(({ code }) => !LANGUAGE_FLAGS[code])).toEqual([]);
   });
 
-  it('portals and flips the dropdown above a trigger near the footer', () => {
-    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
-      top: 700,
-      right: 360,
-      bottom: 728,
-      left: 120,
-      width: 240,
-      height: 28,
-      x: 120,
-      y: 700,
-      toJSON: () => {},
-    });
+  it('portals outside clipping ancestors and flips above a bottom-edge trigger', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1000 });
     Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1200 });
+    const onChange = vi.fn();
+    const { container } = render(
+      <div style={{ overflow: 'hidden', height: 40 }}>
+        <MultiLangPicker selected={[]} onChange={onChange} />
+      </div>,
+    );
+    const trigger = screen.getByRole('button', { name: 'Add language' });
+    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(rect());
 
-    const view = render(<MultiLangPicker selected={[]} onChange={vi.fn()} />);
-    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(trigger);
 
-    const dropdown = screen.getByTestId('multi-lang-dropdown');
-    expect(view.container.contains(dropdown)).toBe(false);
-    expect(dropdown).toHaveClass('multi-lang__drop--portal');
-    expect(dropdown.style.bottom).not.toBe('');
-    expect(dropdown.style.top).toBe('');
+    const menu = screen.getByRole('dialog', { name: 'Add language' });
+    expect(container).not.toContainElement(menu);
+    expect(menu).toHaveStyle({ bottom: '84px', left: '40px', width: '220px' });
+    expect(menu.style.top).toBe('');
+    expect(menu.style.maxHeight).toBe('260px');
+
+    fireEvent.click(screen.getAllByRole('button', { name: /Spanish/ })[0]);
+    expect(onChange).toHaveBeenCalledWith([{ lang: 'Spanish', code: 'es' }]);
+  });
+
+  it('opens below when space permits and Escape closes then restores focus', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1000 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
+    render(<MultiLangPicker selected={[]} onChange={vi.fn()} />);
+    const trigger = screen.getByRole('button', { name: 'Add language' });
+    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(
+      rect({ y: 20, top: 20, bottom: 44 }),
+    );
+
+    fireEvent.click(trigger);
+    expect(screen.getByRole('dialog', { name: 'Add language' })).toHaveStyle({ top: '48px' });
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('dialog', { name: 'Add language' })).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
   });
 
   it('lays selected languages out in a responsive flag grid', () => {
@@ -59,7 +85,7 @@ describe('MultiLangPicker dropdown positioning', () => {
     expect(within(grid).getByTestId('language-flag-ja')).toBeInTheDocument();
   });
 
-  it('shows per-language segment readiness and lets a prepared language be reviewed', () => {
+  it('shows readiness and lets a prepared language be reviewed', () => {
     const onSelect = vi.fn();
     render(
       <MultiLangPicker
@@ -80,15 +106,13 @@ describe('MultiLangPicker dropdown positioning', () => {
     expect(onSelect).toHaveBeenCalledWith('ja');
   });
 
-  it('renders search results as responsive rows with a flag on every language', () => {
+  it('renders searchable language results as responsive flag rows', () => {
     render(<MultiLangPicker selected={[]} onChange={vi.fn()} />);
-    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByRole('button', { name: 'Add language' }));
 
     const allLanguages = screen.getByTestId('multi-lang-all-grid');
     expect(allLanguages.className).toContain('grid-cols-[repeat(auto-fit,minmax(140px,1fr))]');
-    const rows = within(allLanguages).getAllByRole('button');
-    expect(rows.length).toBeGreaterThan(0);
-    for (const row of rows) {
+    for (const row of within(allLanguages).getAllByRole('button')) {
       expect(row.querySelector('[data-language-flag]')).not.toBeNull();
     }
   });
